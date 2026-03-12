@@ -1,7 +1,6 @@
 "use cache";
 
 import SectionHeader from "@/components/common/section-header";
-import VotingButtons from "@/components/products/voting-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -106,7 +105,6 @@ export default async function Product({
                   <p className="text-sm text-muted-foreground mb-2">
                     Support this product
                   </p>
-                  <VotingButtons productId={product.id} voteCount={voteCount} />
                 </div>
                 {voteCount > 100 && (
                   <div className="pt-6 border-t">

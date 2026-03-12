@@ -8,11 +8,9 @@ import {
 } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { StarIcon } from "lucide-react";
-import VotingButtons from "./voting-buttons";
 import { ProductType } from "@/types";
 
 export default function ProductCart({ product }: { product: ProductType }) {
-  const hasVoted = false;
   return (
     <Link href={`/products/${product.slug}`}>
       <Card className="group card-hover hover:bg-primary-foreground/10 border-solid border-gray-400 min-h-50">
@@ -32,11 +30,6 @@ export default function ProductCart({ product }: { product: ProductType }) {
               </div>
               <CardDescription>{product.description}</CardDescription>
             </div>
-            <VotingButtons
-              hasVoted={hasVoted}
-              voteCount={product.voteCount}
-              productId={product.id}
-            />
           </div>
         </CardHeader>
         <CardFooter>
