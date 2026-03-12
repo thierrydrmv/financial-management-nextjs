@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import {
   ArrowRightIcon,
+  BanknoteArrowUp,
   EyeIcon,
-  RocketIcon,
-  SparklesIcon,
   UsersIcon,
+  DollarSign,
 } from "lucide-react";
 import StatsCard from "./stats-card";
 
@@ -21,7 +21,7 @@ const LiveBadge = () => {
         <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
       </span>
       <span className="text-muted-foreground">
-        Join thousands of creators sharing their work
+        Track smarter and build better financial habits
       </span>
     </Badge>
   );
@@ -29,20 +29,20 @@ const LiveBadge = () => {
 
 const statsData = [
   {
-    icon: RocketIcon,
+    icon: DollarSign,
     value: "2.5K+",
-    label: "Projects Shared",
+    label: "Transactions Tracked",
   },
   {
     icon: UsersIcon,
     value: "10K+",
-    label: "Active Creators",
+    label: "Active Users",
     hasBorder: true,
   },
   {
     icon: EyeIcon,
     value: "50K+",
-    label: "Monthly Visitors",
+    label: "Expenses Logged",
     hasBorder: true,
   },
 ];
@@ -54,18 +54,18 @@ export default function HeroSection() {
         <div className="flex flex-col items-center justify-center lg:py-24 py-12 text-center">
           <LiveBadge />
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 max-w-5xl">
-            Share What you&apos;ve Built, Discover What&apos;s Lauching
+            Take Control of Your Money, Build Your Financial Future
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed">
-            A community platform for creators to showcase their apps, AI tools,
-            Saas products, and creative projects. Authentic lauches, real
-            builders, genuine feedback.
+            Track expenses, manage budgets, and gain clear insights into your
+            finances. WealthTrack helps you understand where your money goes and
+            make smarter financial decisions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 mb-16">
             <Button asChild size="lg" className="text-base px-8 shadow-lg">
               <Link href="/submit">
-                <SparklesIcon className="size-5" />
-                Share Your Project
+                <BanknoteArrowUp className="size-5" />
+                Add Expense
               </Link>
             </Button>
             <Button
@@ -74,8 +74,8 @@ export default function HeroSection() {
               className="text-base px-8 shadow-lg"
               variant="secondary"
             >
-              <Link href="/explore">
-                Explore Projects
+              <Link href="/dashboard">
+                View Dashboard
                 <ArrowRightIcon className="size-5" />
               </Link>
             </Button>

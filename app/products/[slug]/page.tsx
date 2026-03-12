@@ -41,11 +41,11 @@ export default async function Product({
     <div className="py-16">
       <div className="wrapper">
         <Link
-          href="/explore"
+          href="/expenses"
           className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeftIcon className="size-4" />
-          Back to Explore
+          Back to Expenses
         </Link>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           <div className="lg:col-span-2 space-y-6">

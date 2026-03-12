@@ -1,5 +1,12 @@
 import { Show, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { CompassIcon, HomeIcon, LoaderIcon, SparkleIcon } from "lucide-react";
+import {
+  AlignEndHorizontal,
+  BanknoteArrowUp,
+  DollarSign,
+  HomeIcon,
+  LoaderIcon,
+  PiggyBank,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Suspense } from "react";
@@ -9,10 +16,10 @@ const Logo = () => {
   return (
     <Link href="/" className="flex items-center gap-2 group">
       <div className="size-8 rounded-lg bg-primary flex items-center justify-center">
-        <SparkleIcon className="size-4 text-primary-foreground" />
+        <PiggyBank className="size-4 text-primary-foreground" />
       </div>
       <span className="text-xl font-bold">
-        i<span className="text-primary">Built</span>This
+        <span className="text-primary">Wealth</span>Track
       </span>
     </Link>
   );
@@ -33,11 +40,18 @@ export default function Header() {
               <span>Home</span>
             </Link>
             <Link
-              href="/explore"
+              href="/expenses"
               className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hover:bg-muted/50"
             >
-              <CompassIcon className="size-4" />
-              <span>Explore</span>
+              <DollarSign className="size-4" />
+              <span>Expenses</span>
+            </Link>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hover:bg-muted/50"
+            >
+              <AlignEndHorizontal className="size-4" />
+              <span>Dashboard</span>
             </Link>
           </nav>
           <div className="flex items-center gap-3">
@@ -57,8 +71,8 @@ export default function Header() {
               <Show when="signed-in">
                 <Button asChild>
                   <Link href="/submit">
-                    <SparkleIcon className="size-4" />
-                    Submit Project
+                    <BanknoteArrowUp className="size-4" />
+                    Submit Expense
                   </Link>
                 </Button>
                 <CustomUserButton />
