@@ -1,3 +1,5 @@
+import { Calendar } from "../ui/calendar";
+import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
@@ -16,6 +18,8 @@ interface FormFieldProps {
   error: string[];
   helperText?: string;
   textarea?: boolean;
+  checkbox?: boolean;
+  calendar?: boolean;
 }
 
 export const FormField = ({
@@ -28,30 +32,43 @@ export const FormField = ({
   error,
   helperText,
   textarea,
+  checkbox,
+  calendar,
 }: FormFieldProps) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {textarea ? (
-        <Textarea
-          id={id}
-          name={name}
-          placeholder={placeholder}
-          required={required}
-          onChange={
-            onChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void
-          }
-        />
+      {checkbox ? (
+        <div className="flex items-center gap-2">
+          <Checkbox id={id} />
+          <Label htmlFor={id}>{label}</Label>
+        </div>
       ) : (
-        <Input
-          id={id}
-          name={name}
-          placeholder={placeholder}
-          required={required}
-          onChange={
-            onChange as (e: React.ChangeEvent<HTMLInputElement>) => void
-          }
-        />
+        <>
+          <Label htmlFor={id}>{label}</Label>
+          {textarea ? (
+            <Textarea
+              id={id}
+              name={name}
+              placeholder={placeholder}
+              required={required}
+              onChange={
+                onChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+              }
+            />
+          ) : calendar ? (
+            <Calendar />
+          ) : (
+            <Input
+              id={id}
+              name={name}
+              placeholder={placeholder}
+              required={required}
+              onChange={
+                onChange as (e: React.ChangeEvent<HTMLInputElement>) => void
+              }
+            />
+          )}
+        </>
       )}
       {helperText && (
         <p className="text-xs text-muted-foreground">{helperText}</p>

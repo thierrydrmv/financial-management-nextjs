@@ -8,6 +8,8 @@ import {
   json,
   uniqueIndex,
   index,
+  boolean,
+  numeric,
 } from "drizzle-orm/pg-core";
 
 // ============= PRODUCTS =============
@@ -47,3 +49,56 @@ export const products = pgTable(
     ),
   }),
 );
+
+// ============= EXPENSES =============
+export const expenses = pgTable(
+  "expenses",
+  {
+    id: serial("id").primaryKey(),
+
+    // Core info
+    title: varchar("title", { length: 120 }).notNull(), // e.g. "Rent", "Groceries"
+    description: text("description"),
+
+    // Money
+    amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+
+    // Category
+    categoryId: integer("category_id")
+      .references(() => expenseCategories.id)
+      .notNull(),
+
+    // Date of the expense
+    expenseDate: timestamp("expense_date", { withTimezone: true }).notNull(),
+
+    // Payment
+    paymentMethod: varchar("payment_method", { length: 50 }),
+    // e.g. Credit Card | Debit | Cash | Pix
+
+    // Recurring expense
+    isRecurring: boolean("is_recurring").default(false),
+
+    // Metadata
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+
+    // Ownership
+    userId: varchar("user_id", { length: 255 }),
+    organizationId: varchar("organization_id", { length: 255 }),
+  },
+  (table) => ({
+    categoryIdx: index("expenses_category_idx").on(table.categoryId),
+    dateIdx: index("expenses_date_idx").on(table.expenseDate),
+    userIdx: index("expenses_user_idx").on(table.userId),
+    organizationIdx: index("expenses_organization_idx").on(
+      table.organizationId,
+    ),
+  }),
+);
+
+// ============= CATEGORIES =============
+export const expenseCategories = pgTable("expense_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 80 }).notNull(), // e.g. Moradia | Alimentação | Transporte | Lazer | Saúde | Vestuário
+  color: varchar("color", { length: 20 }), // for charts
+  icon: varchar("icon", { length: 50 }), // UI icon reference
+});

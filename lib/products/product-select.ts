@@ -34,7 +34,21 @@ export async function getAllProducts() {
   return productsData;
 }
 
-export async function getRecentlyLaunchedProducts() {
+export async function getTodayProducts() {
+  await connection(); // get data on runtime
+  // Everything below will be excluded from prerendering
+  const productsData = await getAllApprovedProducts();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  return productsData.filter(
+    (product) =>
+      product.createdAt &&
+      new Date(product.createdAt.toISOString()) >= yesterday,
+  );
+}
+
+export async function getLastWeekProducts() {
   await connection(); // get data on runtime
   // Everything below will be excluded from prerendering
   const productsData = await getAllApprovedProducts();
@@ -45,6 +59,20 @@ export async function getRecentlyLaunchedProducts() {
     (product) =>
       product.createdAt &&
       new Date(product.createdAt.toISOString()) >= oneWeekAgo,
+  );
+}
+
+export async function getLastMonthProducts() {
+  await connection(); // get data on runtime
+  // Everything below will be excluded from prerendering
+  const productsData = await getAllApprovedProducts();
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+  return productsData.filter(
+    (product) =>
+      product.createdAt &&
+      new Date(product.createdAt.toISOString()) >= oneMonthAgo,
   );
 }
 

@@ -10,7 +10,7 @@ import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export const addProductAction = async (
-  prevState: FormState,
+  _prevState: FormState,
   formData: FormData,
 ) => {
   try {

@@ -70,6 +70,11 @@ export default function Header() {
               </Show>
               <Show when="signed-in">
                 <Button asChild>
+                  <Link href="/submit2">
+                    <BanknoteArrowUp className="size-4" />X
+                  </Link>
+                </Button>
+                <Button asChild>
                   <Link href="/submit">
                     <BanknoteArrowUp className="size-4" />
                     Submit Expense

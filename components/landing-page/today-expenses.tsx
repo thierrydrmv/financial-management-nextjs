@@ -1,19 +1,19 @@
-import { CalendarIcon, RocketIcon } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import ProductCard from "../products/product-card";
 import EmptyState from "../common/empty-state";
-import { getRecentlyLaunchedProducts } from "@/lib/products/product-select";
+import { getTodayProducts } from "@/lib/products/product-select";
 
-export default async function RecentlyLaunchedProducts() {
-  const recentlyLaunchedProducts = await getRecentlyLaunchedProducts();
+export default async function TodayExpenses() {
+  const recentlyLaunchedProducts = await getTodayProducts();
 
   return (
-    <section className="py-20">
+    <section className="py-20 bg-muted/20">
       <div className="wrapper space-y-12">
         <SectionHeader
-          title="Recently Launched"
-          icon={RocketIcon}
-          description="The most recently launched products on the platform"
+          title="Your Daily Spending"
+          icon={Clock}
+          description="Overview of your expenses in the last 24 hours"
         />
         {recentlyLaunchedProducts.length > 0 ? (
           <div className="grid-wrapper">
@@ -23,7 +23,7 @@ export default async function RecentlyLaunchedProducts() {
           </div>
         ) : (
           <EmptyState
-            message="No products launched in the last week. Check back soon for new launches."
+            message="No expenses launched today. Check back soon for new expenses."
             icon={CalendarIcon}
           />
         )}
