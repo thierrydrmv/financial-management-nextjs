@@ -3,6 +3,7 @@ import {
   AlignEndHorizontal,
   BanknoteArrowUp,
   DollarSign,
+  Group,
   HomeIcon,
   LoaderIcon,
   PiggyBank,
@@ -52,6 +53,13 @@ export default function Header() {
             >
               <AlignEndHorizontal className="size-4" />
               <span>Dashboard</span>
+            </Link>
+            <Link
+              href="/categories"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors hover:bg-muted/50"
+            >
+              <Group className="size-4" />
+              <span>Categories</span>
             </Link>
           </nav>
           <div className="flex items-center gap-3">

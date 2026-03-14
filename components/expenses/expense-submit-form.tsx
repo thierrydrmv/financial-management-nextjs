@@ -3,10 +3,10 @@
 import { DollarSign, Loader2Icon } from "lucide-react";
 import { FormField } from "../forms/form-field";
 import { Button } from "../ui/button";
-import { addProductAction } from "@/lib/products/product-actions";
-import { Suspense, useActionState } from "react";
+import { Suspense, useActionState, useState } from "react";
 import { FormState } from "@/types";
 import { cn } from "@/lib/utils";
+import { addExpenseAction } from "@/lib/expenses/expense-actions";
 
 const initialState: FormState = {
   success: false,
@@ -15,8 +15,10 @@ const initialState: FormState = {
 };
 
 export default function ExpenseSubmitForm() {
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [state, formAction, isPending] = useActionState(
-    addProductAction,
+    addExpenseAction,
     initialState,
   );
 
@@ -52,6 +54,15 @@ export default function ExpenseSubmitForm() {
         error={getFieldErrors("title")}
       />
       <FormField
+        label="Amount"
+        id="amount"
+        name="amount"
+        placeholder="$20,00..."
+        required
+        onChange={() => {}}
+        error={getFieldErrors("amount")}
+      />
+      <FormField
         label="Category"
         id="categoryId"
         name="categoryId"
@@ -59,6 +70,48 @@ export default function ExpenseSubmitForm() {
         required
         onChange={() => {}}
         error={getFieldErrors("categoryId")}
+      />
+      <Suspense fallback={<div>Loading calendar...</div>}>
+        <FormField
+          label="Expense Date"
+          id="expenseDate"
+          name="expenseDate"
+          selectedDate={date}
+          onSelectDate={setDate}
+          error={getFieldErrors("expenseDate")}
+          calendar
+        />
+      </Suspense>
+      <input
+        type="hidden"
+        name="expenseDate"
+        value={date ? date.toISOString() : ""}
+      />
+      <FormField
+        label="Payment Method"
+        id="paymentMethod"
+        name="paymentMethod"
+        select
+        placeholder="Select payment method"
+        options={[
+          { label: "Credit Card", value: "credit-card" },
+          { label: "Debit Card", value: "debit-card" },
+          { label: "Cash", value: "cash" },
+          { label: "Pix", value: "pix" },
+        ]}
+        selectValue={paymentMethod}
+        onValueChange={setPaymentMethod}
+        error={getFieldErrors("paymentMethod")}
+      />
+
+      <input type="hidden" name="paymentMethod" value={paymentMethod} />
+      <FormField
+        label="Recurring"
+        id="isRecurring"
+        name="isRecurring"
+        checkbox
+        onCheckedChange={(checked) => console.log(checked)}
+        error={[]}
       />
       <FormField
         label="Description"
@@ -69,47 +122,6 @@ export default function ExpenseSubmitForm() {
         onChange={() => {}}
         error={getFieldErrors("description")}
         textarea
-      />
-
-      <FormField
-        label="Amount"
-        id="amount"
-        name="amount"
-        placeholder="$20,00..."
-        required
-        onChange={() => {}}
-        error={getFieldErrors("amount")}
-      />
-      <Suspense fallback={<div>Loading calendar...</div>}>
-        <FormField
-          label="Expense Date"
-          id="expenseDate"
-          name="expenseDate"
-          placeholder="21/03/2026..."
-          required
-          onChange={() => {}}
-          error={getFieldErrors("expenseDate")}
-          calendar
-        />
-      </Suspense>
-      <FormField
-        label="Expense Date"
-        id="paymentMethod"
-        name="paymentMethod"
-        placeholder="Credit Card | Debit | Cash | Pix..."
-        required
-        onChange={() => {}}
-        error={getFieldErrors("paymentMethod")}
-      />
-      <FormField
-        label="Recurring"
-        id="isRecurring"
-        name="isRecurring"
-        placeholder=""
-        required
-        onChange={() => {}}
-        error={getFieldErrors("isRecurring")}
-        checkbox
       />
       <Button type="submit" size="lg" className="w-full">
         {isPending ? (

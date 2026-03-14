@@ -80,6 +80,7 @@ export const expenses = pgTable(
 
     // Metadata
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+    submittedBy: varchar("submitted_by", { length: 120 }).default("anonymous"),
 
     // Ownership
     userId: varchar("user_id", { length: 255 }),
