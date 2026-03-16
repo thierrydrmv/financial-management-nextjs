@@ -14,9 +14,20 @@ const initialState: FormState = {
   message: "",
 };
 
-export default function ExpenseSubmitForm() {
+interface ExpenseSubmitFormProps {
+  categories: {
+    id: number;
+    name: string;
+  }[];
+}
+
+export default function ExpenseSubmitForm({
+  categories,
+}: ExpenseSubmitFormProps) {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [category, setCategory] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
   const [state, formAction, isPending] = useActionState(
     addExpenseAction,
     initialState,
@@ -27,6 +38,11 @@ export default function ExpenseSubmitForm() {
     if (!errors) return [];
     return (errors as Record<string, string[]>)[fieldName] ?? [];
   };
+
+  const categoryOptions = categories.map((category) => ({
+    label: category.name,
+    value: category.id.toString(),
+  }));
 
   return (
     <form className="space-y-6" action={formAction}>
@@ -68,9 +84,12 @@ export default function ExpenseSubmitForm() {
         name="categoryId"
         placeholder="Choose a category..."
         required
-        onChange={() => {}}
+        select
+        options={categoryOptions}
+        onValueChange={setCategory}
         error={getFieldErrors("categoryId")}
       />
+      <input type="hidden" name="categoryId" value={category} />
       <Suspense fallback={<div>Loading calendar...</div>}>
         <FormField
           label="Expense Date"
@@ -110,15 +129,19 @@ export default function ExpenseSubmitForm() {
         id="isRecurring"
         name="isRecurring"
         checkbox
-        onCheckedChange={(checked) => console.log(checked)}
+        onCheckedChange={(checked) => setIsRecurring(checked === true)}
         error={[]}
+      />
+      <input
+        type="hidden"
+        name="isRecurring"
+        value={isRecurring ? "true" : "false"}
       />
       <FormField
         label="Description"
         id="description"
         name="description"
         placeholder="Tell us more about your expense..."
-        required
         onChange={() => {}}
         error={getFieldErrors("description")}
         textarea

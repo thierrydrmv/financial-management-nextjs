@@ -1,8 +1,10 @@
 import SectionHeader from "@/components/common/section-header";
 import ExpenseSubmitForm from "@/components/expenses/expense-submit-form";
+import { getAllCategories } from "@/lib/categories/category-select";
 import { BanknoteArrowUp } from "lucide-react";
 
-export default function SubmitPage() {
+export default async function SubmitPage() {
+  const categories = await getAllCategories();
   return (
     <section className="py-20">
       <div className="wrapper flex flex-col items-center">
@@ -14,7 +16,7 @@ export default function SubmitPage() {
           />
         </div>
         <div className="max-w-2xl w-full">
-          <ExpenseSubmitForm />
+          <ExpenseSubmitForm categories={categories} />
         </div>
       </div>
     </section>

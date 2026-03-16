@@ -13,9 +13,9 @@ export default async function ExplorePage() {
       <div className="wrapper">
         <div className="mb-12">
           <SectionHeader
-            title="Explore All Products"
+            title="All Expenses"
             icon={CompassIcon}
-            description="Browse and discover amazing projects from our community"
+            description="Browse and manage all your recorded expenses"
           />
           <ProductExplorer products={products} />
         </div>

@@ -3,22 +3,12 @@ import { expenses } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { connection } from "next/server";
 
-export async function getFeaturedexpenses() {
-  "use cache";
-  const expensesData = await db
-    .select()
-    .from(expenses)
-    .orderBy(desc(expenses.createdAt));
-
-  return expensesData;
-}
-
 export async function getAllExpenses() {
   "use cache";
   const expensesData = await db
     .select()
     .from(expenses)
-    .orderBy(desc(expenses.createdAt));
+    .orderBy(desc(expenses.expenseDate));
 
   return expensesData;
 }
@@ -32,8 +22,8 @@ export async function getTodayExpenses() {
 
   return expensesData.filter(
     (expense) =>
-      expense.createdAt &&
-      new Date(expense.createdAt.toISOString()) >= yesterday,
+      expense.expenseDate &&
+      new Date(expense.expenseDate.toISOString()) >= yesterday,
   );
 }
 
@@ -46,8 +36,8 @@ export async function getLastWeekExpenses() {
 
   return expensesData.filter(
     (expense) =>
-      expense.createdAt &&
-      new Date(expense.createdAt.toISOString()) >= oneWeekAgo,
+      expense.expenseDate &&
+      new Date(expense.expenseDate.toISOString()) >= oneWeekAgo,
   );
 }
 
@@ -60,7 +50,7 @@ export async function getLastMonthExpenses() {
 
   return expensesData.filter(
     (expense) =>
-      expense.createdAt &&
-      new Date(expense.createdAt.toISOString()) >= oneMonthAgo,
+      expense.expenseDate &&
+      new Date(expense.expenseDate.toISOString()) >= oneMonthAgo,
   );
 }

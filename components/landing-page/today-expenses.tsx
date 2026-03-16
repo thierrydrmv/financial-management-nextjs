@@ -1,11 +1,23 @@
 import { CalendarIcon, Clock } from "lucide-react";
 import SectionHeader from "../common/section-header";
-import ProductCard from "../products/product-card";
 import EmptyState from "../common/empty-state";
-import { getTodayProducts } from "@/lib/products/product-select";
+import ExpenseCard from "../expenses/expense-card";
+import { getTodayExpenses } from "@/lib/expenses/expense-select";
+import { getCategoryById } from "@/lib/categories/category-select";
 
 export default async function TodayExpenses() {
-  const recentlyLaunchedProducts = await getTodayProducts();
+  const todayExpenses = await getTodayExpenses();
+
+  const expensesWithCategory = await Promise.all(
+    todayExpenses.map(async (expense) => {
+      const category = await getCategoryById(expense.categoryId);
+
+      return {
+        ...expense,
+        category,
+      };
+    }),
+  );
 
   return (
     <section className="py-20 bg-muted/20">
@@ -15,10 +27,14 @@ export default async function TodayExpenses() {
           icon={Clock}
           description="Overview of your expenses in the last 24 hours"
         />
-        {recentlyLaunchedProducts.length > 0 ? (
+        {expensesWithCategory.length > 0 ? (
           <div className="grid-wrapper">
-            {recentlyLaunchedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {expensesWithCategory.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                category={expense.category[0]}
+              />
             ))}
           </div>
         ) : (

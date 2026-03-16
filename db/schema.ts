@@ -65,7 +65,7 @@ export const expenses = pgTable(
 
     // Category
     categoryId: integer("category_id")
-      .references(() => expenseCategories.id)
+      .references(() => categories.id)
       .notNull(),
 
     // Date of the expense
@@ -97,9 +97,8 @@ export const expenses = pgTable(
 );
 
 // ============= CATEGORIES =============
-export const expenseCategories = pgTable("expense_categories", {
+export const categories = pgTable("expense_categories", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 80 }).notNull(), // e.g. Moradia | Alimentação | Transporte | Lazer | Saúde | Vestuário
-  color: varchar("color", { length: 20 }), // for charts
-  icon: varchar("icon", { length: 50 }), // UI icon reference
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });

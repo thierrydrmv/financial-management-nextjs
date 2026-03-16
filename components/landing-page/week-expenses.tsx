@@ -2,12 +2,24 @@ import { ArrowUpRightIcon, CalendarIcon, DollarSign } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import ProductCard from "../products/product-card";
-import { getFeaturedProducts } from "@/lib/products/product-select";
 import EmptyState from "../common/empty-state";
+import { getLastWeekExpenses } from "@/lib/expenses/expense-select";
+import { getCategoryById } from "@/lib/categories/category-select";
+import ExpenseCard from "../expenses/expense-card";
 
 export default async function WeekExpenses() {
-  const featuredProducts = await getFeaturedProducts();
+  const weekExpenses = await getLastWeekExpenses();
+
+  const expensesWithCategory = await Promise.all(
+    weekExpenses.map(async (expense) => {
+      const category = await getCategoryById(expense.categoryId);
+
+      return {
+        ...expense,
+        category,
+      };
+    }),
+  );
 
   return (
     <section className="py-20">
@@ -25,10 +37,14 @@ export default async function WeekExpenses() {
             </Link>
           </Button>
         </div>
-        {featuredProducts.length > 0 ? (
+        {expensesWithCategory.length > 0 ? (
           <div className="grid-wrapper">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {expensesWithCategory.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                category={expense.category[0]}
+              />
             ))}
           </div>
         ) : (

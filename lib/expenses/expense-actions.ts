@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { expenses } from "@/db/schema";
 import z from "zod";
 import { FormState } from "@/types";
+import { revalidatePath } from "next/cache";
 
 export const addExpenseAction = async (
   _prevState: FormState,
@@ -68,6 +69,8 @@ export const addExpenseAction = async (
       organizationId: orgId,
       userId,
     });
+
+    revalidatePath("/");
 
     return {
       success: true,

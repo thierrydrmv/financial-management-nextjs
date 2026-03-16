@@ -1,4 +1,4 @@
-import { products } from "@/db/schema";
+import { categories, expenses, products } from "@/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 
 export type FormState = {
@@ -8,3 +8,5 @@ export type FormState = {
 };
 
 export type ProductType = InferSelectModel<typeof products>;
+export type ExpenseType = InferSelectModel<typeof expenses>;
+export type CategoryType = InferSelectModel<typeof categories>;

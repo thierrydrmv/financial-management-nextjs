@@ -1,13 +1,25 @@
-import { getFeaturedProducts } from "@/lib/products/product-select";
 import SectionHeader from "../common/section-header";
 import { ArrowUpRightIcon, Calendar, CalendarIcon } from "lucide-react";
-import ProductCard from "../products/product-card";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
+import { getLastMonthExpenses } from "@/lib/expenses/expense-select";
+import { getCategoryById } from "@/lib/categories/category-select";
+import ExpenseCard from "../expenses/expense-card";
 
 export default async function MonthExpenses() {
-  const featuredProducts = await getFeaturedProducts();
+  const monthExpenses = await getLastMonthExpenses();
+
+  const expensesWithCategory = await Promise.all(
+    monthExpenses.map(async (expense) => {
+      const category = await getCategoryById(expense.categoryId);
+
+      return {
+        ...expense,
+        category,
+      };
+    }),
+  );
 
   return (
     <section className="py-20 bg-muted/20">
@@ -25,10 +37,14 @@ export default async function MonthExpenses() {
             </Link>
           </Button>
         </div>
-        {featuredProducts.length > 0 ? (
+        {expensesWithCategory.length > 0 ? (
           <div className="grid-wrapper">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {expensesWithCategory.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                category={expense.category[0]}
+              />
             ))}
           </div>
         ) : (
