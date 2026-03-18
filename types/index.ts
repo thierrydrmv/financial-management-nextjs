@@ -10,3 +10,7 @@ export type FormState = {
 export type ProductType = InferSelectModel<typeof products>;
 export type ExpenseType = InferSelectModel<typeof expenses>;
 export type CategoryType = InferSelectModel<typeof categories>;
+
+export type ExpenseWithCategory = ExpenseType & {
+  category: CategoryType;
+};

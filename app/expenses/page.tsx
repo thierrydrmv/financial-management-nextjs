@@ -1,12 +1,12 @@
 "use cache";
 
 import SectionHeader from "@/components/common/section-header";
-import ProductExplorer from "@/components/products/product-explorer";
-import { getAllApprovedProducts } from "@/lib/products/product-select";
+import ExpenseExplorer from "@/components/expenses/expense-explorer";
+import { getAllExpensesWithCategory } from "@/lib/expenses/expense-select";
 import { CompassIcon } from "lucide-react";
 
 export default async function ExplorePage() {
-  const products = await getAllApprovedProducts();
+  const expensesWithCategory = await getAllExpensesWithCategory();
 
   return (
     <div className="py-20">
@@ -17,7 +17,7 @@ export default async function ExplorePage() {
             icon={CompassIcon}
             description="Browse and manage all your recorded expenses"
           />
-          <ProductExplorer products={products} />
+          <ExpenseExplorer expensesWithCategory={expensesWithCategory} />
         </div>
       </div>
     </div>

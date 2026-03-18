@@ -71,6 +71,7 @@ export const addExpenseAction = async (
     });
 
     revalidatePath("/");
+    revalidatePath("/expenses");
 
     return {
       success: true,

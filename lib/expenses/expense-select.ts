@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { expenses } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { categories, expenses } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 import { connection } from "next/server";
 
 export async function getAllExpenses() {
@@ -53,4 +53,35 @@ export async function getLastMonthExpenses() {
       expense.expenseDate &&
       new Date(expense.expenseDate.toISOString()) >= oneMonthAgo,
   );
+}
+
+export async function getAllExpensesWithCategory() {
+  const result = await db
+    .select({
+      // campos de expense
+      id: expenses.id,
+      title: expenses.title,
+      description: expenses.description,
+      amount: expenses.amount,
+      categoryId: expenses.categoryId,
+      expenseDate: expenses.expenseDate,
+      paymentMethod: expenses.paymentMethod,
+      isRecurring: expenses.isRecurring,
+      createdAt: expenses.createdAt,
+      submittedBy: expenses.submittedBy,
+      userId: expenses.userId,
+      organizationId: expenses.organizationId,
+
+      // categoria como objeto
+      category: {
+        id: categories.id,
+        name: categories.name,
+        createdAt: categories.createdAt,
+      },
+    })
+    .from(expenses)
+    .innerJoin(categories, eq(expenses.categoryId, categories.id))
+    .orderBy(desc(expenses.expenseDate));
+
+  return result;
 }
