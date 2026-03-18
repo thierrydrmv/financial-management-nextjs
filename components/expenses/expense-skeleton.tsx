@@ -1,6 +1,6 @@
 import { Skeleton } from "../ui/skeleton";
 
-export default function ProductSkeleton() {
+export default function ExpenseSkeleton() {
   return (
     <section className="py-20">
       <div className="wrapper">

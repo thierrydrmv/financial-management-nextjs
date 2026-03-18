@@ -52,6 +52,7 @@ export const addCategoryAction = async (
 
     revalidatePath("/submit");
     revalidatePath("/categories");
+    revalidatePath("/expenses");
 
     return {
       success: true,

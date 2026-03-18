@@ -85,3 +85,35 @@ export async function getAllExpensesWithCategory() {
 
   return result;
 }
+
+export async function getExpenseById(id: number) {
+  const result = await db
+    .select({
+      // campos de expense
+      id: expenses.id,
+      title: expenses.title,
+      description: expenses.description,
+      amount: expenses.amount,
+      categoryId: expenses.categoryId,
+      expenseDate: expenses.expenseDate,
+      paymentMethod: expenses.paymentMethod,
+      isRecurring: expenses.isRecurring,
+      createdAt: expenses.createdAt,
+      submittedBy: expenses.submittedBy,
+      userId: expenses.userId,
+      organizationId: expenses.organizationId,
+
+      // categoria como objeto
+      category: {
+        id: categories.id,
+        name: categories.name,
+        createdAt: categories.createdAt,
+      },
+    })
+    .from(expenses)
+    .where(eq(expenses.id, id))
+    .innerJoin(categories, eq(expenses.categoryId, categories.id))
+    .orderBy(desc(expenses.expenseDate));
+
+  return result[0];
+}
