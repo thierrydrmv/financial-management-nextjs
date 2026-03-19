@@ -1,12 +1,17 @@
-"use cache";
-
 import SectionHeader from "@/components/common/section-header";
 import ExpenseExplorer from "@/components/expenses/expense-explorer";
-import { getAllExpensesWithCategory } from "@/lib/expenses/expense-select";
+import { getAllExpensesWithCategoryByUser } from "@/lib/expenses/expense-select";
+import { auth } from "@clerk/nextjs/server";
 import { CompassIcon } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function ExplorePage() {
-  const expensesWithCategory = await getAllExpensesWithCategory();
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+  const expensesWithCategory = await getAllExpensesWithCategoryByUser(userId);
 
   return (
     <div className="py-20">

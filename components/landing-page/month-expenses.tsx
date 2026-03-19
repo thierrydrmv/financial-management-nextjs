@@ -3,12 +3,19 @@ import { ArrowUpRightIcon, Calendar, CalendarIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
-import { getLastMonthExpenses } from "@/lib/expenses/expense-select";
+import { getLastMonthExpensesByUser } from "@/lib/expenses/expense-select";
 import { getCategoryById } from "@/lib/categories/category-select";
 import ExpenseCard from "../expenses/expense-card";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function MonthExpenses() {
-  const monthExpenses = await getLastMonthExpenses();
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+  const monthExpenses = await getLastMonthExpensesByUser(userId);
 
   const expensesWithCategory = await Promise.all(
     monthExpenses.map(async (expense) => {

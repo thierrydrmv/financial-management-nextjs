@@ -51,7 +51,7 @@ export default function ExpenseExplorer({
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
           <Input
             type="text"
-            placeholder="Search Products..."
+            placeholder="Search Expenses..."
             className="pl-10"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

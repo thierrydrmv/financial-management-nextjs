@@ -1,10 +1,10 @@
-"use cache";
-
 import SectionHeader from "@/components/common/section-header";
-import { DeleteExpense } from "@/components/expenses/expense-delete.form";
+import { ExpenseDeleteForm } from "@/components/expenses/expense-delete-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getAllExpenses, getExpenseById } from "@/lib/expenses/expense-select";
+import { getAllCategories } from "@/lib/categories/category-select";
+import { getExpenseByIdAndUser } from "@/lib/expenses/expense-select";
+import { auth } from "@clerk/nextjs/server";
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -14,12 +14,12 @@ import {
   WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export const generateStaticParams = async () => {
-  const expenses = await getAllExpenses();
+  const categories = await getAllCategories();
 
-  return expenses.map((expense) => ({
+  return categories.map((expense) => ({
     id: String(expense.id),
   }));
 };
@@ -29,9 +29,14 @@ export default async function Expense({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
   const { id } = await params;
 
-  const expense = await getExpenseById(parseInt(id));
+  const expense = await getExpenseByIdAndUser(parseInt(id), userId);
 
   if (!expense) notFound();
 
@@ -141,7 +146,7 @@ export default async function Expense({
                     Edit
                   </Link>
                 </Button>
-                <DeleteExpense id={id} />
+                <ExpenseDeleteForm id={id} />
               </div>
             </div>
           </div>

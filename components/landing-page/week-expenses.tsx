@@ -3,12 +3,19 @@ import SectionHeader from "../common/section-header";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
-import { getLastWeekExpenses } from "@/lib/expenses/expense-select";
+import { getLastWeekExpensesByUser } from "@/lib/expenses/expense-select";
 import { getCategoryById } from "@/lib/categories/category-select";
 import ExpenseCard from "../expenses/expense-card";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export default async function WeekExpenses() {
-  const weekExpenses = await getLastWeekExpenses();
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+  const weekExpenses = await getLastWeekExpensesByUser(userId);
 
   const expensesWithCategory = await Promise.all(
     weekExpenses.map(async (expense) => {

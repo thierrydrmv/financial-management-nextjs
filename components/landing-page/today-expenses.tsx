@@ -2,11 +2,18 @@ import { CalendarIcon, Clock } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import EmptyState from "../common/empty-state";
 import ExpenseCard from "../expenses/expense-card";
-import { getTodayExpenses } from "@/lib/expenses/expense-select";
+import { getTodayExpensesByUser } from "@/lib/expenses/expense-select";
 import { getCategoryById } from "@/lib/categories/category-select";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export default async function TodayExpenses() {
-  const todayExpenses = await getTodayExpenses();
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+  const todayExpenses = await getTodayExpensesByUser(userId);
 
   const expensesWithCategory = await Promise.all(
     todayExpenses.map(async (expense) => {

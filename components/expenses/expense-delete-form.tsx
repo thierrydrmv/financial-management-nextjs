@@ -2,7 +2,7 @@ import { Trash2Icon } from "lucide-react";
 import { Button } from "../ui/button";
 import { deleteExpenseAction } from "@/lib/expenses/expense-actions";
 
-export function DeleteExpense({ id }: { id: string }) {
+export function ExpenseDeleteForm({ id }: { id: string }) {
   return (
     <form action={deleteExpenseAction}>
       <input type="hidden" name="id" value={id} />

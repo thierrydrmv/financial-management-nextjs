@@ -34,6 +34,8 @@ interface FormFieldProps {
   select?: boolean;
 
   options?: SelectOption[];
+  defaultValue?: string;
+  defaultChecked?: boolean;
 
   onChange?: (
     e:
@@ -68,6 +70,8 @@ export const FormField = ({
   onSelectDate,
   selectValue,
   onValueChange,
+  defaultValue,
+  defaultChecked,
 }: FormFieldProps) => {
   return (
     <div className="space-y-2">
@@ -75,6 +79,7 @@ export const FormField = ({
         <div className="flex items-center gap-2">
           <Checkbox
             id={id}
+            defaultChecked={defaultChecked}
             onCheckedChange={(checked) => onCheckedChange?.(checked === true)}
           />
           <Label htmlFor={id}>{label}</Label>
@@ -89,6 +94,7 @@ export const FormField = ({
               name={name}
               placeholder={placeholder}
               required={required}
+              defaultValue={defaultValue}
               onChange={
                 onChange as React.ChangeEventHandler<HTMLTextAreaElement>
               }
@@ -119,6 +125,7 @@ export const FormField = ({
               name={name}
               placeholder={placeholder}
               required={required}
+              defaultValue={defaultValue}
               onChange={onChange as React.ChangeEventHandler<HTMLInputElement>}
             />
           )}

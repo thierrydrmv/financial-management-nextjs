@@ -127,21 +127,25 @@ export const deleteExpenseAction = async (
   redirect("/expenses");
 };
 
-export type ExpenseActionState = {
-  success: boolean;
-  message: string;
-  errors?: Record<string, string[]>;
-};
-
-const updateExpenseSchema = expenseSchema.extend({
-  id: z.coerce.number().int().positive("Invalid expense id."),
-});
-
 export async function updateExpenseAction(
-  prevState: ExpenseActionState,
+  _prevState: FormState,
   formData: FormData,
-): Promise<ExpenseActionState> {
+): Promise<FormState> {
   try {
+    const { userId, orgId } = await auth();
+    if (!userId)
+      return {
+        success: false,
+        message: "You must be signed in to submit a expense.",
+        errors: undefined,
+      };
+
+    if (!orgId)
+      return {
+        success: false,
+        message: "You must be a member of an organization to submit a expense.",
+        errors: undefined,
+      };
     const rawData = {
       id: formData.get("id"),
       title: formData.get("title"),
@@ -150,11 +154,10 @@ export async function updateExpenseAction(
       categoryId: formData.get("categoryId"),
       expenseDate: formData.get("expenseDate"),
       paymentMethod: formData.get("paymentMethod"),
-      isRecurring: formData.get("isRecurring") === "true",
+      isRecurring: formData.get("isRecurring"),
     };
 
-    const validatedFields = updateExpenseSchema.safeParse(rawData);
-
+    const validatedFields = expenseSchema.safeParse(rawData);
     if (!validatedFields.success) {
       return {
         success: false,
@@ -162,9 +165,14 @@ export async function updateExpenseAction(
         errors: validatedFields.error.flatten().fieldErrors,
       };
     }
+    const rawId = formData.get("id") as string;
 
+    if (typeof rawId !== "string") {
+      throw new Error("Invalid id");
+    }
+
+    const id = parseInt(rawId);
     const data = validatedFields.data;
-
     await db
       .update(expenses)
       .set({
@@ -176,11 +184,12 @@ export async function updateExpenseAction(
         paymentMethod: data.paymentMethod,
         isRecurring: data.isRecurring ?? false,
       })
-      .where(eq(expenses.id, data.id));
+      .where(eq(expenses.id, id));
 
+    revalidatePath("/");
     revalidatePath("/expenses");
-    revalidatePath(`/expenses/${data.id}`);
     revalidatePath("/dashboard");
+    revalidatePath(`/expenses/${id}`);
 
     return {
       success: true,

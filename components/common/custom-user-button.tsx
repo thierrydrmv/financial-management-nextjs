@@ -1,9 +1,7 @@
 "use client";
 
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
-import { Building2Icon, BuildingIcon } from "lucide-react";
-import Link from "next/link";
-import { Button } from "../ui/button";
+import { BuildingIcon } from "lucide-react";
 
 export default function CustomUserButton() {
   return (

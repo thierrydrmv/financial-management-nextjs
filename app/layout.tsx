@@ -20,14 +20,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${outfit.className} antialiased`}>
+    <html lang="en">
+      <body className={`${outfit.className} antialiased`}>
+        <ClerkProvider>
           <Header />
           {children}
           <Footer />
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

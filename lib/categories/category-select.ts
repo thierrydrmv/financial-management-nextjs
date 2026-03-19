@@ -14,5 +14,5 @@ export async function getAllCategories() {
 
 export async function getCategoryById(id: number) {
   const allCategories = await getAllCategories();
-  return allCategories.filter((expense) => expense.id === id);
+  return allCategories.filter((category) => category.id === id);
 }

@@ -1,61 +1,66 @@
 import { db } from "@/db";
 import { categories, expenses } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and, gte } from "drizzle-orm";
 import { connection } from "next/server";
 
-export async function getAllExpenses() {
-  "use cache";
-  const expensesData = await db
+export async function getAllExpensesByUser(userId: string) {
+  await connection();
+
+  return await db
     .select()
     .from(expenses)
+    .where(eq(expenses.userId, userId))
     .orderBy(desc(expenses.expenseDate));
-
-  return expensesData;
 }
 
-export async function getTodayExpenses() {
+export async function getTodayExpensesByUser(userId: string) {
   await connection(); // get data on runtime
   // Everything below will be excluded from prerendering
-  const expensesData = await getAllExpenses();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
 
-  return expensesData.filter(
-    (expense) =>
-      expense.expenseDate &&
-      new Date(expense.expenseDate.toISOString()) >= yesterday,
-  );
+  return await db
+    .select()
+    .from(expenses)
+    .where(
+      and(eq(expenses.userId, userId), gte(expenses.expenseDate, yesterday)),
+    )
+    .orderBy(desc(expenses.expenseDate));
 }
 
-export async function getLastWeekExpenses() {
+export async function getLastWeekExpensesByUser(userId: string) {
   await connection(); // get data on runtime
   // Everything below will be excluded from prerendering
-  const expensesData = await getAllExpenses();
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  return expensesData.filter(
-    (expense) =>
-      expense.expenseDate &&
-      new Date(expense.expenseDate.toISOString()) >= oneWeekAgo,
-  );
+  return await db
+    .select()
+    .from(expenses)
+    .where(
+      and(eq(expenses.userId, userId), gte(expenses.expenseDate, oneWeekAgo)),
+    )
+    .orderBy(desc(expenses.expenseDate));
 }
 
-export async function getLastMonthExpenses() {
+export async function getLastMonthExpensesByUser(userId: string) {
   await connection(); // get data on runtime
   // Everything below will be excluded from prerendering
-  const expensesData = await getAllExpenses();
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-  return expensesData.filter(
-    (expense) =>
-      expense.expenseDate &&
-      new Date(expense.expenseDate.toISOString()) >= oneMonthAgo,
-  );
+  return await db
+    .select()
+    .from(expenses)
+    .where(
+      and(eq(expenses.userId, userId), gte(expenses.expenseDate, oneMonthAgo)),
+    )
+    .orderBy(desc(expenses.expenseDate));
 }
 
-export async function getAllExpensesWithCategory() {
+export async function getAllExpensesWithCategoryByUser(userId: string) {
+  await connection();
+
   const result = await db
     .select({
       // campos de expense
@@ -81,12 +86,14 @@ export async function getAllExpensesWithCategory() {
     })
     .from(expenses)
     .innerJoin(categories, eq(expenses.categoryId, categories.id))
+    .where(eq(expenses.userId, userId))
     .orderBy(desc(expenses.expenseDate));
 
   return result;
 }
 
-export async function getExpenseById(id: number) {
+export async function getExpenseByIdAndUser(id: number, userId: string) {
+  await connection();
   const result = await db
     .select({
       // campos de expense
@@ -102,8 +109,6 @@ export async function getExpenseById(id: number) {
       submittedBy: expenses.submittedBy,
       userId: expenses.userId,
       organizationId: expenses.organizationId,
-
-      // categoria como objeto
       category: {
         id: categories.id,
         name: categories.name,
@@ -111,9 +116,8 @@ export async function getExpenseById(id: number) {
       },
     })
     .from(expenses)
-    .where(eq(expenses.id, id))
     .innerJoin(categories, eq(expenses.categoryId, categories.id))
-    .orderBy(desc(expenses.expenseDate));
+    .where(and(eq(expenses.id, id), eq(expenses.userId, userId)));
 
-  return result[0];
+  return result[0] ?? null;
 }
