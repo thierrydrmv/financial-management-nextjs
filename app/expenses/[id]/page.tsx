@@ -131,7 +131,11 @@ export default async function Expense({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Button asChild variant="outline" className="w-full ">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full cursor-pointer hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-600 dark:hover:bg-blue-500/20 dark:hover:text-blue-400"
+                >
                   <Link href={`/expenses/${id}/edit`}>
                     <PencilIcon className="size-4 mr-2" />
                     Edit

@@ -1,7 +1,7 @@
 import CategoryList from "@/components/categories/category-list";
 import CategorySubmitForm from "@/components/categories/category-submit-form";
 import SectionHeader from "@/components/common/section-header";
-import { getAllCategories } from "@/lib/categories/category-select";
+import { getAllCategoriesWithExpenseCount } from "@/lib/categories/category-select";
 import { SparkleIcon } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -13,7 +13,7 @@ export default async function Categories() {
     redirect("/sign-in");
   }
 
-  const categories = await getAllCategories();
+  const categories = await getAllCategoriesWithExpenseCount();
 
   return (
     <section className="py-20">

@@ -1,10 +1,11 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CategoryType } from "@/types";
-import { FolderIcon } from "lucide-react";
+import { Group } from "lucide-react";
+import { CategoryDeleteForm } from "./category-delete-form";
+import { CategoryWithExpenseCount } from "@/lib/categories/category-select";
 export default function CategoryList({
   categories,
 }: {
-  categories: CategoryType[];
+  categories: CategoryWithExpenseCount[];
 }) {
   if (categories.length === 0) {
     return (
@@ -21,23 +22,29 @@ export default function CategoryList({
           <li key={cat.id}>
             <Card className="py-0 shadow-none">
               <CardContent className="flex items-center gap-3 px-4 py-4">
-                <FolderIcon
-                  className="size-4 shrink-0 text-muted-foreground"
-                  aria-hidden
-                />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{cat.name}</p>
-                  {cat.createdAt ? (
-                    <p className="text-xs text-muted-foreground">
-                      Added{" "}
-                      {new Date(cat.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  ) : null}
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <Group
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{cat.name}</p>
+                    {cat.createdAt ? (
+                      <p className="text-xs text-muted-foreground">
+                        Added{" "}
+                        {new Date(cat.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
+                <CategoryDeleteForm
+                  id={String(cat.id)}
+                  disabled={cat.expenseCount > 0}
+                />
               </CardContent>
             </Card>
           </li>

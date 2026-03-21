@@ -101,11 +101,11 @@ export const deleteExpenseAction = async (
 ): Promise<void> => {
   const { userId, orgId } = await auth();
 
-  if (!userId) throw new Error("You must be signed in to delete an expense.");
+  if (!userId) throw new Error("You must be signed in to delete a expense.");
 
   if (!orgId)
     throw new Error(
-      "You must be a member of an organization to delete an expense.",
+      "You must be a member of an organization to delete a expense.",
     );
 
   const idValue = formData.get("id");
