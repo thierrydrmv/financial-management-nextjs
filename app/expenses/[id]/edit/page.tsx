@@ -7,20 +7,14 @@ import { BanknoteArrowUp } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
-export async function generateStaticParams() {
-  const categories = await getAllCategories();
-
-  return categories.slice(0, 1).map((expense) => ({
-    id: String(expense.id),
-  }));
-}
-
 async function EditExpenseContent({ id }: { id: string }) {
   const { userId } = await auth();
 
   if (!userId) {
     redirect("/sign-in");
   }
+  if (!id || Number.isNaN(Number(id))) notFound();
+
   const [categories, expense] = await Promise.all([
     getAllCategories(),
     getExpenseByIdAndUser(Number(id), userId),

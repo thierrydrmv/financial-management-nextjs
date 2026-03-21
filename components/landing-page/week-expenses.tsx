@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
 import { getLastWeekExpensesByUser } from "@/lib/expenses/expense-select";
-import { getCategoryById } from "@/lib/categories/category-select";
 import ExpenseCard from "../expenses/expense-card";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -16,17 +15,6 @@ export default async function WeekExpenses() {
     redirect("/sign-in");
   }
   const weekExpenses = await getLastWeekExpensesByUser(userId);
-
-  const expensesWithCategory = await Promise.all(
-    weekExpenses.map(async (expense) => {
-      const category = await getCategoryById(expense.categoryId);
-
-      return {
-        ...expense,
-        category,
-      };
-    }),
-  );
 
   return (
     <section className="py-20">
@@ -44,19 +32,19 @@ export default async function WeekExpenses() {
             </Link>
           </Button>
         </div>
-        {expensesWithCategory.length > 0 ? (
+        {weekExpenses.length > 0 ? (
           <div className="grid-wrapper">
-            {expensesWithCategory.map((expense) => (
+            {weekExpenses.map((expense) => (
               <ExpenseCard
                 key={expense.id}
                 expense={expense}
-                category={expense.category[0]}
+                category={expense.category ?? undefined}
               />
             ))}
           </div>
         ) : (
           <EmptyState
-            message="No expenses launched today. Check back soon for new expenses."
+            message="No expenses launched this week. Check back soon for new expenses."
             icon={CalendarIcon}
           />
         )}

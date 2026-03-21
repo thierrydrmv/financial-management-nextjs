@@ -2,8 +2,15 @@ import SectionHeader from "@/components/common/section-header";
 import ExpenseSubmitForm from "@/components/expenses/expense-submit-form";
 import { getAllCategories } from "@/lib/categories/category-select";
 import { BanknoteArrowUp } from "lucide-react";
+import { redirect } from "next/navigation";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function SubmitPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
   const categories = await getAllCategories();
   return (
     <section className="py-20">

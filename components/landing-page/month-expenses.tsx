@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
 import { getLastMonthExpensesByUser } from "@/lib/expenses/expense-select";
-import { getCategoryById } from "@/lib/categories/category-select";
 import ExpenseCard from "../expenses/expense-card";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
@@ -16,17 +15,6 @@ export default async function MonthExpenses() {
     redirect("/sign-in");
   }
   const monthExpenses = await getLastMonthExpensesByUser(userId);
-
-  const expensesWithCategory = await Promise.all(
-    monthExpenses.map(async (expense) => {
-      const category = await getCategoryById(expense.categoryId);
-
-      return {
-        ...expense,
-        category,
-      };
-    }),
-  );
 
   return (
     <section className="py-20 bg-muted/20">
@@ -44,19 +32,19 @@ export default async function MonthExpenses() {
             </Link>
           </Button>
         </div>
-        {expensesWithCategory.length > 0 ? (
+        {monthExpenses.length > 0 ? (
           <div className="grid-wrapper">
-            {expensesWithCategory.map((expense) => (
+            {monthExpenses.map((expense) => (
               <ExpenseCard
                 key={expense.id}
                 expense={expense}
-                category={expense.category[0]}
+                category={expense.category ?? undefined}
               />
             ))}
           </div>
         ) : (
           <EmptyState
-            message="No expenses launched today. Check back soon for new expenses."
+            message="No expenses launched this month. Check back soon for new expenses."
             icon={CalendarIcon}
           />
         )}

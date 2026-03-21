@@ -56,7 +56,7 @@ export const addCategoryAction = async (
 
     return {
       success: true,
-      message: "Category submitted successfully! It will be reviewed shortly.",
+      message: "Category submitted successfully!",
       errors: undefined,
     };
   } catch (error) {

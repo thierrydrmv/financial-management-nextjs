@@ -7,7 +7,7 @@ import { expenses } from "@/db/schema";
 import z from "zod";
 import { FormState } from "@/types";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 
 export const addExpenseAction = async (
@@ -20,14 +20,15 @@ export const addExpenseAction = async (
     if (!userId)
       return {
         success: false,
-        message: "You must be signed in to submit a expense.",
+        message: "You must be signed in to submit an expense.",
         errors: undefined,
       };
 
     if (!orgId)
       return {
         success: false,
-        message: "You must be a member of an organization to submit a expense.",
+        message:
+          "You must be a member of an organization to submit an expense.",
         errors: undefined,
       };
 
@@ -35,8 +36,6 @@ export const addExpenseAction = async (
     const user = await currentUser();
     const userEmail = user?.primaryEmailAddress?.emailAddress || "anonymous";
     const rawFormData = Object.fromEntries(formData.entries());
-
-    console.log(formData);
 
     // validate the data
     const validatedData = expenseSchema.safeParse(rawFormData);
@@ -77,7 +76,7 @@ export const addExpenseAction = async (
 
     return {
       success: true,
-      message: "Expense submitted successfully! It will be reviewed shortly.",
+      message: "Expense submitted successfully!",
       errors: undefined,
     };
   } catch (error) {
@@ -117,7 +116,9 @@ export const deleteExpenseAction = async (
   }
 
   try {
-    await db.delete(expenses).where(eq(expenses.id, id));
+    await db
+      .delete(expenses)
+      .where(and(eq(expenses.id, id), eq(expenses.userId, userId)));
     revalidatePath("/");
     revalidatePath("/expenses");
   } catch (error) {
@@ -136,14 +137,15 @@ export async function updateExpenseAction(
     if (!userId)
       return {
         success: false,
-        message: "You must be signed in to submit a expense.",
+        message: "You must be signed in to update an expense.",
         errors: undefined,
       };
 
     if (!orgId)
       return {
         success: false,
-        message: "You must be a member of an organization to submit a expense.",
+        message:
+          "You must be a member of an organization to update an expense.",
         errors: undefined,
       };
     const rawData = {
@@ -165,13 +167,18 @@ export async function updateExpenseAction(
         errors: validatedFields.error.flatten().fieldErrors,
       };
     }
+
     const rawId = formData.get("id") as string;
-
-    if (typeof rawId !== "string") {
-      throw new Error("Invalid id");
+    if (!rawId || Number.isNaN(Number(rawId))) {
+      return {
+        success: false,
+        message: "Invalid expense id.",
+        errors: {
+          id: ["Invalid expense id."],
+        },
+      };
     }
-
-    const id = parseInt(rawId);
+    const id = Number(rawId);
     const data = validatedFields.data;
     await db
       .update(expenses)
@@ -184,7 +191,7 @@ export async function updateExpenseAction(
         paymentMethod: data.paymentMethod,
         isRecurring: data.isRecurring ?? false,
       })
-      .where(eq(expenses.id, id));
+      .where(and(eq(expenses.id, id), eq(expenses.userId, userId)));
 
     revalidatePath("/");
     revalidatePath("/expenses");

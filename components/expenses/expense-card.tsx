@@ -7,42 +7,80 @@ import {
   CardFooter,
 } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { StarIcon } from "lucide-react";
+import { CalendarIcon, StarIcon } from "lucide-react";
 import { CategoryType, ExpenseType } from "@/types";
-
+function formatPaymentLabel(method: string | null | undefined) {
+  if (!method) return null;
+  return method
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
 export default function ExpenseCard({
   expense,
   category,
 }: {
   expense: ExpenseType;
-  category: CategoryType;
+  category?: CategoryType | null;
 }) {
+  const formattedAmount = Number(expense.amount).toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+  });
+  const dateLine = expense.expenseDate
+    ? new Date(expense.expenseDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+  const paymentLabel = formatPaymentLabel(expense.paymentMethod);
   return (
     <Link href={`/expenses/${expense.id}`}>
       <Card className="group card-hover hover:bg-primary-foreground/10 border-solid border-gray-400 min-h-50">
-        <CardHeader className="flex-1">
-          <div className="flex items-start gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-lg group-hover:text-primary transition-colors">
+        <CardHeader className="flex-1 space-y-0 pb-2">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
                   {expense.title}
                 </CardTitle>
                 {expense.isRecurring && (
-                  <Badge className="gap-1 bg-primary text-primary-foreground">
+                  <Badge className="gap-1 bg-primary text-primary-foreground shrink-0">
                     <StarIcon className="size-3 fill-current" />
                     Recurring
                   </Badge>
                 )}
               </div>
-              <CardDescription>{expense.description}</CardDescription>
+              {dateLine && (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <CalendarIcon className="size-3.5 shrink-0" aria-hidden />
+                  <span>{dateLine}</span>
+                </p>
+              )}
+              {expense.description ? (
+                <CardDescription className="line-clamp-2">
+                  {expense.description}
+                </CardDescription>
+              ) : null}
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-xs font-medium text-muted-foreground">
+                Amount
+              </p>
+              <p className="text-lg font-semibold tabular-nums text-emerald-500">
+                {formattedAmount}
+              </p>
             </div>
           </div>
-          <h1>Amount: {expense.amount}</h1>
         </CardHeader>
-        <CardFooter>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">{category.name}</Badge>
-          </div>
+        <CardFooter className="flex flex-row flex-wrap items-center justify-between gap-2 border-t pt-4">
+          <Badge variant="secondary">{category?.name ?? "Uncategorized"}</Badge>
+          {paymentLabel ? (
+            <Badge variant="outline" className="font-normal">
+              {paymentLabel}
+            </Badge>
+          ) : null}
         </CardFooter>
       </Card>
     </Link>

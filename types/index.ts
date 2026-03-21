@@ -11,5 +11,5 @@ export type ExpenseType = InferSelectModel<typeof expenses>;
 export type CategoryType = InferSelectModel<typeof categories>;
 
 export type ExpenseWithCategory = ExpenseType & {
-  category: CategoryType;
+  category?: CategoryType | null;
 };

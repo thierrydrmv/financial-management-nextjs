@@ -2,7 +2,6 @@ import SectionHeader from "@/components/common/section-header";
 import { ExpenseDeleteForm } from "@/components/expenses/expense-delete-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getAllCategories } from "@/lib/categories/category-select";
 import { getExpenseByIdAndUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import {
@@ -16,14 +15,6 @@ import {
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-export const generateStaticParams = async () => {
-  const categories = await getAllCategories();
-
-  return categories.map((expense) => ({
-    id: String(expense.id),
-  }));
-};
-
 export default async function Expense({
   params,
 }: {
@@ -36,7 +27,11 @@ export default async function Expense({
   }
   const { id } = await params;
 
-  const expense = await getExpenseByIdAndUser(parseInt(id), userId);
+  if (!id || Number.isNaN(Number(id))) {
+    notFound();
+  }
+
+  const expense = await getExpenseByIdAndUser(Number(id), userId);
 
   if (!expense) notFound();
 
@@ -87,11 +82,7 @@ export default async function Expense({
                   },
                   {
                     label: "Category:",
-                    value: category
-                      ? typeof category === "string"
-                        ? category
-                        : category.name
-                      : "Not informed",
+                    value: category?.name ?? "Not informed",
                     icon: TagIcon,
                   },
                   {
