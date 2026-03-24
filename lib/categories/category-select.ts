@@ -6,16 +6,17 @@ export type CategoryWithExpenseCount = Awaited<
   ReturnType<typeof getAllCategoriesWithExpenseCount>
 >[number];
 
-export async function getAllCategories() {
+export async function getAllCategories(userId: string) {
   const categoryData = await db
     .select()
     .from(categories)
+    .where(eq(categories.userId, userId))
     .orderBy(desc(categories.createdAt));
 
   return categoryData;
 }
 
-export async function getAllCategoriesWithExpenseCount() {
+export async function getAllCategoriesWithExpenseCount(userId: string) {
   const result = await db
     .select({
       id: categories.id,
@@ -25,6 +26,7 @@ export async function getAllCategoriesWithExpenseCount() {
     })
     .from(categories)
     .leftJoin(expenses, eq(expenses.categoryId, categories.id))
+    .where(eq(categories.userId, userId)) // Add this
     .groupBy(categories.id)
     .orderBy(desc(categories.createdAt));
   return result;

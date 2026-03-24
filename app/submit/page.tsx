@@ -11,7 +11,7 @@ export default async function SubmitPage() {
   if (!userId) {
     redirect("/sign-in");
   }
-  const categories = await getAllCategories();
+  const categories = await getAllCategories(userId);
   return (
     <section className="py-20">
       <div className="wrapper flex flex-col items-center">

@@ -10,6 +10,12 @@ export type FormState = {
 export type ExpenseType = InferSelectModel<typeof expenses>;
 export type CategoryType = InferSelectModel<typeof categories>;
 
+export type ExpenseCategorySummary = {
+  id: number;
+  name: string;
+  createdAt: Date | null;
+};
+
 export type ExpenseWithCategory = ExpenseType & {
-  category?: CategoryType | null;
+  category?: ExpenseCategorySummary | null;
 };

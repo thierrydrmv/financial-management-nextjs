@@ -8,7 +8,7 @@ import {
 } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { CalendarIcon, StarIcon } from "lucide-react";
-import { CategoryType, ExpenseType } from "@/types";
+import { ExpenseCategorySummary, ExpenseType } from "@/types";
 function formatPaymentLabel(method: string | null | undefined) {
   if (!method) return null;
   return method
@@ -21,7 +21,7 @@ export default function ExpenseCard({
   category,
 }: {
   expense: ExpenseType;
-  category?: CategoryType | null;
+  category?: ExpenseCategorySummary | null;
 }) {
   const formattedAmount = Number(expense.amount).toLocaleString("en-US", {
     style: "currency",

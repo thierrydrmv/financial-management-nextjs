@@ -15,7 +15,7 @@ export function CategoryDeleteForm({
   disabled = false,
 }: {
   id: string;
-  disabled: boolean;
+  disabled?: boolean;
 }) {
   const [state, formAction, isPending] = useActionState(
     deleteCategoryAction,

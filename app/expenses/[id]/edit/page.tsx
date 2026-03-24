@@ -16,7 +16,7 @@ async function EditExpenseContent({ id }: { id: string }) {
   if (!id || Number.isNaN(Number(id))) notFound();
 
   const [categories, expense] = await Promise.all([
-    getAllCategories(),
+    getAllCategories(userId),
     getExpenseByIdAndUser(Number(id), userId),
   ]);
 

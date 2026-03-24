@@ -7,7 +7,7 @@ import { categories, expenses } from "@/db/schema";
 import z from "zod";
 import { FormState } from "@/types";
 import { revalidatePath } from "next/cache";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 
 export const addCategoryAction = async (
   _prevState: FormState,
@@ -45,10 +45,28 @@ export const addCategoryAction = async (
     }
     const { name } = validatedData.data;
 
+    const existing = await db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(
+        and(eq(categories.userId, userId), eq(categories.name, name.trim())),
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      return {
+        success: false,
+        message: "You already have a category with this name.",
+        errors: { name: ["A category with this name already exists."] },
+      };
+    }
+
     // transform the data
 
     await db.insert(categories).values({
       name,
+      userId,
+      organizationId: orgId,
     });
 
     revalidatePath("/submit");
@@ -119,7 +137,9 @@ export const deleteCategoryAction = async (
         errors: undefined,
       };
     }
-    await db.delete(categories).where(eq(categories.id, id));
+    await db
+      .delete(categories)
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)));
     revalidatePath("/");
     revalidatePath("/categories");
     revalidatePath("/expenses");

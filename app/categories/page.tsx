@@ -13,7 +13,7 @@ export default async function Categories() {
     redirect("/sign-in");
   }
 
-  const categories = await getAllCategoriesWithExpenseCount();
+  const categories = await getAllCategoriesWithExpenseCount(userId);
 
   return (
     <section className="py-20">
