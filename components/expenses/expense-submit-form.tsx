@@ -80,7 +80,11 @@ export default function ExpenseSubmitForm({
           { label: "Income", value: "income" },
         ]}
         selectValue={type}
-        onValueChange={(value) => setType(value as "expense" | "income")}
+        onValueChange={(value) => {
+          const nextType = value as "expense" | "income";
+          setType(nextType);
+          if (nextType === "income") setCategory("");
+        }}
         error={getFieldErrors("type")}
       />
       <input type="hidden" name="type" value={type} />
@@ -93,18 +97,25 @@ export default function ExpenseSubmitForm({
         onChange={() => {}}
         error={getFieldErrors("amount")}
       />
-      <FormField
-        label="Category"
-        id="categoryId"
+      {type === "expense" ? (
+        <FormField
+          label="Category"
+          id="categoryId"
+          name="categoryId"
+          placeholder="Choose a category..."
+          required
+          select
+          options={categoryOptions}
+          selectValue={category}
+          onValueChange={setCategory}
+          error={getFieldErrors("categoryId")}
+        />
+      ) : null}
+      <input
+        type="hidden"
         name="categoryId"
-        placeholder="Choose a category..."
-        required
-        select
-        options={categoryOptions}
-        onValueChange={setCategory}
-        error={getFieldErrors("categoryId")}
+        value={type === "expense" ? category : ""}
       />
-      <input type="hidden" name="categoryId" value={category} />
       <Suspense fallback={<div>Loading calendar...</div>}>
         <FormField
           label="Finance Date"

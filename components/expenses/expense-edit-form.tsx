@@ -25,7 +25,7 @@ interface ExpenseEditFormProps {
     title: string;
     description?: string | null;
     amount: string;
-    categoryId: number;
+    categoryId: number | null;
     expenseDate: Date;
     paymentMethod?: string | null;
     isRecurring?: boolean | null;
@@ -93,7 +93,13 @@ export default function ExpenseEditForm({
           { label: "Income", value: "income" },
         ]}
         selectValue={type}
-        onValueChange={(value) => setType(value as "income" | "expense")}
+        onValueChange={(value) => {
+          const financeType: "income" | "expense" = value as
+            | "income"
+            | "expense";
+          setType(financeType);
+          if (financeType === "income") setCategory("");
+        }}
         error={getFieldErrors("type")}
       />
 
@@ -117,16 +123,18 @@ export default function ExpenseEditForm({
         error={getFieldErrors("amount")}
       />
 
-      <FormField
-        label="Category"
-        id="categoryId"
-        name="categoryId"
-        select
-        options={categoryOptions}
-        selectValue={category}
-        onValueChange={setCategory}
-        error={getFieldErrors("categoryId")}
-      />
+      {type === "expense" ? (
+        <FormField
+          label="Category"
+          id="categoryId"
+          name="categoryId"
+          select
+          options={categoryOptions}
+          selectValue={category}
+          onValueChange={setCategory}
+          error={getFieldErrors("categoryId")}
+        />
+      ) : null}
       <input type="hidden" name="categoryId" value={category} />
 
       <Suspense fallback={<div>Loading calendar...</div>}>

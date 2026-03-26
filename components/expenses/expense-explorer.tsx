@@ -13,9 +13,16 @@ export default function ExpenseExplorer({
   expensesWithCategory: ExpenseWithCategory[];
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedType, setSelectedType] = useState<
+    "all" | "expense" | "income"
+  >("all");
   const [searchQuery, setSearchQuery] = useState("");
   const filteredExpenses = useMemo(() => {
     let filtered = [...expensesWithCategory];
+
+    if (selectedType !== "all") {
+      filtered = filtered.filter((expense) => expense.type === selectedType);
+    }
 
     if (searchQuery.trim().length > 0) {
       filtered = filtered.filter((expense) =>
@@ -30,7 +37,7 @@ export default function ExpenseExplorer({
     }
 
     return filtered;
-  }, [expensesWithCategory, searchQuery, selectedCategory]);
+  }, [expensesWithCategory, searchQuery, selectedCategory, selectedType]);
 
   const categories = useMemo(() => {
     const unique = new Map();
@@ -57,30 +64,48 @@ export default function ExpenseExplorer({
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            onClick={() => setSelectedCategory(null)}
-            variant={!selectedCategory ? "default" : "outline"}
-          >
-            All
-          </Button>
+      </div>
+      <div className="mb-4 flex gap-2 flex-wrap">
+        <Button
+          onClick={() => setSelectedType("all")}
+          variant={selectedType === "all" ? "default" : "outline"}
+        >
+          All Types
+        </Button>
+        <Button
+          onClick={() => setSelectedType("expense")}
+          variant={selectedType === "expense" ? "default" : "outline"}
+        >
+          Expenses
+        </Button>
+        <Button
+          onClick={() => setSelectedType("income")}
+          variant={selectedType === "income" ? "default" : "outline"}
+        >
+          Income
+        </Button>
+      </div>
+      <div className="mb-8 flex gap-2 flex-wrap">
+        <Button
+          onClick={() => setSelectedCategory(null)}
+          variant={!selectedCategory ? "default" : "outline"}
+        >
+          All
+        </Button>
 
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.name)}
-              variant={
-                selectedCategory === category.name ? "default" : "outline"
-              }
-            >
-              {category.name}
-            </Button>
-          ))}
-        </div>
+        {categories.map((category) => (
+          <Button
+            key={category.id}
+            onClick={() => setSelectedCategory(category.name)}
+            variant={selectedCategory === category.name ? "default" : "outline"}
+          >
+            {category.name}
+          </Button>
+        ))}
       </div>
       <div className="mb-6">
         <p className="text-sm text-muted-foreground">
-          Showing {filteredExpenses.length} expenses
+          Showing {filteredExpenses.length} finance entries
         </p>
       </div>
       <div className="grid-wrapper">

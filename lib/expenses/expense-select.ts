@@ -28,7 +28,7 @@ function expensesWithCategoryQuery(whereClause: SQL) {
   return db
     .select(expenseWithCategorySelect)
     .from(expenses)
-    .innerJoin(categories, eq(expenses.categoryId, categories.id))
+    .leftJoin(categories, eq(expenses.categoryId, categories.id))
     .where(whereClause);
 }
 

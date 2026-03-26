@@ -82,7 +82,10 @@ export default async function Expense({
                   },
                   {
                     label: "Category:",
-                    value: category?.name ?? "Not informed",
+                    value:
+                      type === "income"
+                        ? "N/A for income"
+                        : category?.name ?? "Not informed",
                     icon: TagIcon,
                   },
                   {

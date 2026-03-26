@@ -24,7 +24,7 @@ type ExpenseSeed = {
   title: string;
   description: string | null;
   amount: string;
-  categoryId: number;
+  categoryId: number | null;
   expenseDate: Date;
   paymentMethod: string;
   isRecurring: boolean;
@@ -201,7 +201,7 @@ function buildExpensesForMonth(
     title: "Salary",
     description: "Monthly salary",
     amount: amountStr(3200, salt + 19),
-    categoryId: byName("Housing"),
+    categoryId: null,
     expenseDate: d(2),
     paymentMethod: pickPayment(salt + 20),
     isRecurring: true,
@@ -213,7 +213,7 @@ function buildExpensesForMonth(
       title: "Freelance",
       description: "Extra project income",
       amount: amountStr(650, salt + 21),
-      categoryId: byName("Shopping"),
+      categoryId: null,
       expenseDate: d(20 + (salt % 5)),
       paymentMethod: pickPayment(salt + 22),
       isRecurring: false,

@@ -10,13 +10,17 @@ export const expenseSchema = z.object({
     .min(3, { message: "Expense name must be at least 3 characters" })
     .max(120, { message: "Expense name must be less than 120 characters" }),
 
-  categoryId: z
-    .string()
-    .min(1, { message: "Category is required" })
-    .transform((val) => Number(val))
-    .refine((val) => !Number.isNaN(val), {
-      message: "Category must be a valid number",
-    }),
+  categoryId: z.preprocess(
+    (value) => {
+      if (value === undefined || value === null || value === "") return null;
+      if (typeof value === "string") {
+        const num = Number(value);
+        return Number.isNaN(num) ? value : num;
+      }
+      return value;
+    },
+    z.number().int().positive().nullable(),
+  ),
 
   description: z
     .string()
@@ -42,4 +46,20 @@ export const expenseSchema = z.object({
     .string()
     .optional()
     .transform((val) => val === "true"),
+}).superRefine((data, ctx) => {
+  if (data.type === "expense" && data.categoryId === null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["categoryId"],
+      message: "Category is required for expense entries",
+    });
+  }
+
+  if (data.type === "income" && data.categoryId !== null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["categoryId"],
+      message: "Income entries should not have a category",
+    });
+  }
 });

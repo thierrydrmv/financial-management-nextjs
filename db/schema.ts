@@ -28,9 +28,7 @@ export const expenses = pgTable(
     type: financeTypeEnum("type").notNull().default("expense"),
 
     // Category
-    categoryId: integer("category_id")
-      .references(() => categories.id)
-      .notNull(),
+    categoryId: integer("category_id").references(() => categories.id),
 
     // Date of the expense
     expenseDate: timestamp("expense_date", { withTimezone: true }).notNull(),

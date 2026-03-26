@@ -79,10 +79,12 @@ export default function ExpenseCard({
         </CardHeader>
         <CardFooter className="flex flex-row flex-wrap items-center justify-between gap-2 border-t pt-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={isIncome ? "default" : "secondary"}>
-              {isIncome ? "Income" : "Expense"}
-            </Badge>
-            <Badge variant="secondary">{category?.name ?? "Uncategorized"}</Badge>
+            <Badge variant="secondary">{isIncome ? "Income" : "Expense"}</Badge>
+            {!isIncome ? (
+              <Badge variant="secondary">
+                {category?.name ?? "Uncategorized"}
+              </Badge>
+            ) : null}
           </div>
           {paymentLabel ? (
             <Badge variant="outline" className="font-normal">
