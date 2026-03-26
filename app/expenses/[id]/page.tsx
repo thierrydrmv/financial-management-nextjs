@@ -3,6 +3,7 @@ import { ExpenseDeleteForm } from "@/components/expenses/expense-delete-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getExpenseByIdAndUser } from "@/lib/expenses/expense-select";
+import { formatCurrency } from "@/lib/formatters/currency";
 import { auth } from "@clerk/nextjs/server";
 import {
   ArrowLeftIcon,
@@ -86,10 +87,7 @@ export default async function Expense({
                   },
                   {
                     label: "Amount:",
-                    value: Number(amount).toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }),
+                    value: formatCurrency(Number(amount)),
                     icon: WalletIcon,
                   },
                 ].map(({ label, value, icon: Icon }) => (
@@ -111,10 +109,7 @@ export default async function Expense({
                     Expense summary
                   </p>
                   <p className="text-2xl font-bold">
-                    {Number(amount).toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    })}
+                    {formatCurrency(Number(amount))}
                   </p>
                 </div>
 

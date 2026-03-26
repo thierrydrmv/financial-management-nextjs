@@ -17,6 +17,7 @@ export default function DashboardSidebar({
   selectedYear,
   selectedMonth,
 }: DashboardSidebarProps) {
+  const safeSelectedMonth = Math.min(12, Math.max(1, selectedMonth));
   const monthEntries = Array.from({ length: 12 }, (_, i) => {
     const d = new Date(selectedYear, i, 1);
     return {
@@ -46,7 +47,7 @@ export default function DashboardSidebar({
             {yearOptions.map((y) => (
               <Link
                 key={y}
-                href={dashboardHref(y, selectedMonth)}
+                href={dashboardHref(y, safeSelectedMonth)}
                 className={cn(
                   "block w-full rounded-md px-3 py-1 text-left transition-colors",
                   y === selectedYear
@@ -71,7 +72,7 @@ export default function DashboardSidebar({
                 href={dashboardHref(selectedYear, index1)}
                 className={cn(
                   "block w-full rounded-md px-3 py-1 text-left transition-colors",
-                  index1 === selectedMonth
+                  index1 === safeSelectedMonth
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground hover:bg-muted",
                 )}

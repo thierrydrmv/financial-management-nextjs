@@ -1,14 +1,23 @@
 import { auth } from "@clerk/nextjs/server";
 import { getAllExpensesWithCategoryByUser } from "@/lib/expenses/expense-select";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
-import { categoryChartBgClassForLabel } from "@/lib/dashboard/category-palette";
+import {
+  categoryChartBgClassForLabel,
+  categoryChartCssVarForLabel,
+} from "@/lib/dashboard/category-palette";
 import { cn } from "@/lib/utils";
+import type { ExpenseWithCategory } from "@/types";
+import { formatCurrency } from "@/lib/formatters/currency";
 
 /** Dashboard-wide: recurring = green, one-time = red (theme tokens). */
 const COLOR_RECURRING = "var(--primary)";
 const COLOR_ONE_TIME = "var(--destructive)";
 /** Deeper green for recurring-only accents (still on-brand). */
 const COLOR_RECURRING_ALT = "var(--chart-6)";
+const COLOR_TOTAL_A = "var(--chart-2)";
+const COLOR_TOTAL_B = "var(--chart-4)";
+const COLOR_SHARE_FILL = "var(--primary)";
+const COLOR_SHARE_REST = "rgba(0,0,0,0)";
 
 function MiniGradientFill({ from, to }: { from: string; to: string }) {
   return (
@@ -49,11 +58,11 @@ function clampNumber(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n));
 }
 
-function formatCurrencyUSD(amount: number) {
-  return amount.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
+function formatSharePercent(value: number) {
+  return `${value.toLocaleString("en-US", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })}%`;
 }
 
 function monthKey(d: Date) {
@@ -88,17 +97,35 @@ export type FinanceDashboardProps = {
   selectedMonth: number;
 };
 
-export default async function FinanceDashboard({
-  selectedYear: rawYear,
-  selectedMonth: rawMonth,
-}: FinanceDashboardProps) {
-  const { userId, redirectToSignIn } = await auth();
-  if (!userId) redirectToSignIn();
-  const userIdSafe = userId as string;
+type FinanceDashboardComputed = {
+  selYear: number;
+  selMonth1: number;
+  periodLabel: string;
+  yearOptions: number[];
+  thisMonthTotal: number;
+  thisMonthRecurringTotal: number;
+  monthShareOfAnnualBasePct: number;
+  yearShareOfTotalBasePct: number;
+  calendarRecurring: number[];
+  calendarOneTime: number[];
+  yearlyProgress: Array<{
+    label: string;
+    value: number;
+    colorCssVar: string;
+  }>;
+  monthTop: Array<{ name: string; total: number }>;
+  monthTopMax: number;
+  maxBar: number;
+  recurringPath: string;
+  oneTimePath: string;
+  monthLabels: string[];
+};
 
-  const expensesWithCategory =
-    await getAllExpensesWithCategoryByUser(userIdSafe);
-
+function computeFinanceDashboardData(
+  expensesWithCategory: ExpenseWithCategory[],
+  rawYear: number,
+  rawMonth: number,
+): FinanceDashboardComputed {
   const now = new Date();
   const selYear = clampNumber(Math.floor(rawYear), 1970, 2100);
   const selMonth1 = clampNumber(Math.floor(rawMonth), 1, 12);
@@ -195,19 +222,10 @@ export default async function FinanceDashboard({
 
   const totalRolling = rollingMonthTotals.reduce((acc, v) => acc + v, 0);
 
-  /** Selected month’s spending as a share of the selected calendar year’s total */
   const monthShareOfAnnualBasePct =
     yearTotal > 0 ? (thisMonthTotal / yearTotal) * 100 : 0;
-  /** Selected calendar year’s spending as a share of all recorded expenses */
   const yearShareOfTotalBasePct =
     allTimeTotal > 0 ? (yearTotal / allTimeTotal) * 100 : 0;
-
-  function formatSharePercent(value: number) {
-    return `${value.toLocaleString("en-US", {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })}%`;
-  }
 
   const topCategoryRolling = Array.from(categoryTotalsRolling.entries())
     .map(([id, agg]) => ({ id, ...agg }))
@@ -219,7 +237,7 @@ export default async function FinanceDashboard({
     return {
       label: item.name,
       value: Math.round(share),
-      colorClass: categoryChartBgClassForLabel(item.name),
+      colorCssVar: categoryChartCssVarForLabel(item.name),
     };
   });
 
@@ -246,6 +264,64 @@ export default async function FinanceDashboard({
     year: "numeric",
   });
 
+  return {
+    selYear,
+    selMonth1,
+    periodLabel,
+    yearOptions,
+    thisMonthTotal,
+    thisMonthRecurringTotal,
+    monthShareOfAnnualBasePct,
+    yearShareOfTotalBasePct,
+    calendarRecurring,
+    calendarOneTime,
+    yearlyProgress,
+    monthTop,
+    monthTopMax,
+    maxBar,
+    recurringPath,
+    oneTimePath,
+    monthLabels,
+  };
+}
+
+export default async function FinanceDashboard({
+  selectedYear: rawYear,
+  selectedMonth: rawMonth,
+}: FinanceDashboardProps) {
+  const { userId, redirectToSignIn } = await auth();
+  if (!userId) redirectToSignIn();
+  const userIdSafe = userId as string;
+
+  const expensesWithCategory =
+    await getAllExpensesWithCategoryByUser(userIdSafe);
+
+  const computed = computeFinanceDashboardData(
+    expensesWithCategory,
+    rawYear,
+    rawMonth,
+  );
+
+  const {
+    selYear,
+    selMonth1,
+    periodLabel,
+    yearOptions,
+    thisMonthTotal,
+    thisMonthRecurringTotal,
+    monthShareOfAnnualBasePct,
+    yearShareOfTotalBasePct,
+    calendarRecurring,
+    calendarOneTime,
+    yearlyProgress,
+    monthTop,
+    monthTopMax,
+    maxBar,
+    recurringPath,
+    oneTimePath,
+    monthLabels,
+  } = computed;
+
   return (
     <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
       <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[220px_1fr]">
@@ -259,14 +335,14 @@ export default async function FinanceDashboard({
           <div className="grid gap-4 xl:grid-cols-3">
             <DashboardPanel title={`Total expenses — ${periodLabel}`}>
               <p className="text-3xl font-bold">
-                {formatCurrencyUSD(thisMonthTotal)}
+                {formatCurrency(thisMonthTotal)}
               </p>
-              <MiniGradientFill from={COLOR_RECURRING} to={COLOR_ONE_TIME} />
+              <MiniGradientFill from={COLOR_TOTAL_A} to={COLOR_TOTAL_B} />
             </DashboardPanel>
 
             <DashboardPanel title={`Recurring expenses — ${periodLabel}`}>
               <p className="text-3xl font-bold">
-                {formatCurrencyUSD(thisMonthRecurringTotal)}
+                {formatCurrency(thisMonthRecurringTotal)}
               </p>
               <MiniGradientFill
                 from={COLOR_RECURRING}
@@ -281,12 +357,13 @@ export default async function FinanceDashboard({
               >
                 <div className="mx-auto h-32 w-32 rounded-full border-8 border-border p-1">
                   <div
-                    className="flex h-full w-full items-center justify-center rounded-full"
+                    className="flex h-full w-full items-center justify-center rounded-full bg-muted/50"
+                    aria-hidden
                     style={{
                       background: buildConicGradient(
                         monthShareOfAnnualBasePct,
-                        COLOR_RECURRING,
-                        COLOR_ONE_TIME,
+                        COLOR_SHARE_FILL,
+                        COLOR_SHARE_REST,
                       ),
                     }}
                   >
@@ -308,12 +385,12 @@ export default async function FinanceDashboard({
               >
                 <div className="mx-auto h-32 w-32 rounded-full border-8 border-border p-1">
                   <div
-                    className="flex h-full w-full items-center justify-center rounded-full"
+                    className="flex h-full w-full items-center justify-center rounded-full bg-muted/50"
                     style={{
                       background: buildConicGradient(
                         yearShareOfTotalBasePct,
-                        COLOR_RECURRING,
-                        COLOR_ONE_TIME,
+                        COLOR_SHARE_FILL,
+                        COLOR_SHARE_REST,
                       ),
                     }}
                   >
@@ -390,17 +467,20 @@ export default async function FinanceDashboard({
                     <div className="mx-auto mb-2 h-16 w-16 rounded-full border-4 border-border p-1">
                       <div className="relative h-full w-full rounded-full bg-muted/50">
                         <div
-                          className={cn(
-                            "absolute inset-0 rounded-full",
-                            item.colorClass,
-                          )}
+                          className="absolute inset-0 rounded-full"
                           style={{
-                            clipPath: `polygon(0 ${100 - item.value}%, 100% ${
-                              100 - item.value
-                            }%, 100% 100%, 0 100%)`,
-                            opacity: 0.9,
+                            background: `conic-gradient(${item.colorCssVar} 0 ${clampNumber(
+                              item.value,
+                              0,
+                              100,
+                            )}%, rgba(0,0,0,0) ${clampNumber(
+                              item.value,
+                              0,
+                              100,
+                            )}% 100%)`,
                           }}
                         />
+                        <div className="absolute inset-2 rounded-full bg-card" />
                       </div>
                     </div>
                     <p className="text-xs font-semibold">{item.value}%</p>
@@ -423,7 +503,7 @@ export default async function FinanceDashboard({
                       <div className="mb-1 flex items-center justify-between text-sm">
                         <span className="text-foreground">{item.name}</span>
                         <span className="text-muted-foreground">
-                          {formatCurrencyUSD(item.total)}
+                          {formatCurrency(item.total)}
                         </span>
                       </div>
                       <div className="h-3 rounded-full bg-muted">

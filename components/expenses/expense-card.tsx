@@ -9,6 +9,7 @@ import {
 import { Badge } from "../ui/badge";
 import { CalendarIcon, StarIcon } from "lucide-react";
 import { ExpenseCategorySummary, ExpenseType } from "@/types";
+import { formatCurrency } from "@/lib/formatters/currency";
 function formatPaymentLabel(method: string | null | undefined) {
   if (!method) return null;
   return method
@@ -23,10 +24,7 @@ export default function ExpenseCard({
   expense: ExpenseType;
   category?: ExpenseCategorySummary | null;
 }) {
-  const formattedAmount = Number(expense.amount).toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-  });
+  const formattedAmount = formatCurrency(Number(expense.amount));
   const dateLine = expense.expenseDate
     ? new Date(expense.expenseDate).toLocaleDateString("en-US", {
         month: "short",

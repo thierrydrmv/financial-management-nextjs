@@ -13,7 +13,7 @@ function parseYearMonth(
   const m = hasMonth
     ? Number.parseInt(mStr, 10)
     : hasYear
-      ? 1
+      ? now.getMonth() + 1
       : now.getMonth() + 1;
   return {
     year: Number.isFinite(y) ? y : now.getFullYear(),
@@ -26,7 +26,11 @@ export default async function Dashboard({
 }: {
   searchParams: Promise<{ year?: string; month?: string }>;
 }) {
-  const sp = await searchParams;
-  const { year, month } = parseYearMonth(sp.year, sp.month);
-  return <FinanceDashboard selectedYear={year} selectedMonth={month} />;
+  const { year, month } = await searchParams;
+  return (
+    <FinanceDashboard
+      selectedYear={Number(year)}
+      selectedMonth={Number(month)}
+    />
+  );
 }

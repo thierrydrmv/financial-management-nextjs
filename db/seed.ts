@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/neon-http";
+import { and, eq } from "drizzle-orm";
 import { categories, expenses } from "./schema";
 
 const db = drizzle(process.env.DATABASE_URL!);
@@ -187,7 +188,13 @@ function buildExpensesForMonth(
 }
 
 function seedExpenses(categoryIds: CategoryRow[]): ExpenseSeed[] {
-  const byName = (n: string) => categoryIds.find((c) => c.name === n)!.id;
+  const byName = (n: string) => {
+    const found = categoryIds.find((c) => c.name === n);
+    if (!found) {
+      throw new Error(`Seed category not found: "${n}"`);
+    }
+    return found.id;
+  };
   const today = new Date();
   const all: ExpenseSeed[] = [];
 
@@ -210,8 +217,16 @@ function seedExpenses(categoryIds: CategoryRow[]): ExpenseSeed[] {
 async function main() {
   console.log("🌱 Seeding database...");
 
-  await db.delete(expenses);
-  await db.delete(categories);
+  await db
+    .delete(expenses)
+    .where(
+      and(eq(expenses.userId, SEED_USER_ID), eq(expenses.organizationId, SEED_ORG_ID)),
+    );
+  await db
+    .delete(categories)
+    .where(
+      and(eq(categories.userId, SEED_USER_ID), eq(categories.organizationId, SEED_ORG_ID)),
+    );
   console.log("✅ Cleared existing data");
 
   const insertedCategories = await db
