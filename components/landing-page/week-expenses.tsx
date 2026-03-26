@@ -6,15 +6,15 @@ import EmptyState from "../common/empty-state";
 import { getLastWeekExpensesByUser } from "@/lib/expenses/expense-select";
 import ExpenseCard from "../expenses/expense-card";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 export default async function WeekExpenses() {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
-  const weekExpenses = await getLastWeekExpensesByUser(userId);
+  const userIdSafe = userId as string;
+  const weekExpenses = await getLastWeekExpensesByUser(userIdSafe);
 
   return (
     <section className="py-20">

@@ -4,16 +4,15 @@ import SectionHeader from "@/components/common/section-header";
 import { getAllCategoriesWithExpenseCount } from "@/lib/categories/category-select";
 import { SparkleIcon } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 export default async function Categories() {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
-
-  const categories = await getAllCategoriesWithExpenseCount(userId);
+  const userIdSafe = userId as string;
+  const categories = await getAllCategoriesWithExpenseCount(userIdSafe);
 
   return (
     <section className="py-20">

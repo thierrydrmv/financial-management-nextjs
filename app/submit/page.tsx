@@ -2,16 +2,16 @@ import SectionHeader from "@/components/common/section-header";
 import ExpenseSubmitForm from "@/components/expenses/expense-submit-form";
 import { getAllCategories } from "@/lib/categories/category-select";
 import { BanknoteArrowUp } from "lucide-react";
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function SubmitPage() {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
-  const categories = await getAllCategories(userId);
+  const userIdSafe = userId as string;
+  const categories = await getAllCategories(userIdSafe);
   return (
     <section className="py-20">
       <div className="wrapper flex flex-col items-center">

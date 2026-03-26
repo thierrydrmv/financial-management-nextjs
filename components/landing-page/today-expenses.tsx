@@ -4,15 +4,15 @@ import EmptyState from "../common/empty-state";
 import ExpenseCard from "../expenses/expense-card";
 import { getTodayExpensesByUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 export default async function TodayExpenses() {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
-  const todayExpenses = await getTodayExpensesByUser(userId);
+  const userIdSafe = userId as string;
+  const todayExpenses = await getTodayExpensesByUser(userIdSafe);
 
   return (
     <section className="py-20 bg-muted/20">

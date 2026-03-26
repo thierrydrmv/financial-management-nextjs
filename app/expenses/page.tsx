@@ -3,15 +3,16 @@ import ExpenseExplorer from "@/components/expenses/expense-explorer";
 import { getAllExpensesWithCategoryByUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import { CompassIcon } from "lucide-react";
-import { redirect } from "next/navigation";
 
 export default async function ExplorePage() {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
-  const expensesWithCategory = await getAllExpensesWithCategoryByUser(userId);
+  const userIdSafe = userId as string;
+  const expensesWithCategory =
+    await getAllExpensesWithCategoryByUser(userIdSafe);
 
   return (
     <div className="py-20">

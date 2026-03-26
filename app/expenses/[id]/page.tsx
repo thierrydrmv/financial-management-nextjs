@@ -13,25 +13,24 @@ import {
   WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export default async function Expense({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
-  if (!userId) {
-    redirect("/sign-in");
-  }
+  if (!userId) redirectToSignIn();
   const { id } = await params;
 
   if (!id || Number.isNaN(Number(id))) {
     notFound();
   }
 
-  const expense = await getExpenseByIdAndUser(Number(id), userId);
+  const userIdSafe = userId as string;
+  const expense = await getExpenseByIdAndUser(Number(id), userIdSafe);
 
   if (!expense) notFound();
 

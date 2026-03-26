@@ -5,16 +5,16 @@ import Link from "next/link";
 import EmptyState from "../common/empty-state";
 import { getLastMonthExpensesByUser } from "@/lib/expenses/expense-select";
 import ExpenseCard from "../expenses/expense-card";
-import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function MonthExpenses() {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
-  const monthExpenses = await getLastMonthExpensesByUser(userId);
+  const userIdSafe = userId as string;
+  const monthExpenses = await getLastMonthExpensesByUser(userIdSafe);
 
   return (
     <section className="py-20 bg-muted/20">

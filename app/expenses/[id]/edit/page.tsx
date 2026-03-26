@@ -4,20 +4,21 @@ import { getAllCategories } from "@/lib/categories/category-select";
 import { getExpenseByIdAndUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import { BanknoteArrowUp } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 async function EditExpenseContent({ id }: { id: string }) {
-  const { userId } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirectToSignIn();
   }
   if (!id || Number.isNaN(Number(id))) notFound();
+  const userIdSafe = userId as string;
 
   const [categories, expense] = await Promise.all([
-    getAllCategories(userId),
-    getExpenseByIdAndUser(Number(id), userId),
+    getAllCategories(userIdSafe),
+    getExpenseByIdAndUser(Number(id), userIdSafe),
   ]);
 
   if (!expense) notFound();
