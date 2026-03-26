@@ -1,3 +1,5 @@
+import ExpenseSkeleton from "@/components/expenses/expense-skeleton";
+
 export default function Loading() {
-  return <div>Loading expense...</div>;
+  return <ExpenseSkeleton />;
 }

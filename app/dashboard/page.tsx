@@ -26,11 +26,7 @@ export default async function Dashboard({
 }: {
   searchParams: Promise<{ year?: string; month?: string }>;
 }) {
-  const { year, month } = await searchParams;
-  return (
-    <FinanceDashboard
-      selectedYear={Number(year)}
-      selectedMonth={Number(month)}
-    />
-  );
+  const { year: rawYear, month: rawMonth } = await searchParams;
+  const { year, month } = parseYearMonth(rawYear, rawMonth);
+  return <FinanceDashboard selectedYear={year} selectedMonth={month} />;
 }
