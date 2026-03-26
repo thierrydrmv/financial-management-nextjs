@@ -20,6 +20,7 @@ const seedCategories = [
 type CategoryRow = { id: number; name: string };
 
 type ExpenseSeed = {
+  type: "income" | "expense";
   title: string;
   description: string | null;
   amount: string;
@@ -79,6 +80,7 @@ function buildExpensesForMonth(
     new Date(year, month0, clampDay(year, month0, day, today));
 
   rows.push({
+    type: "expense",
     title: "Rent",
     description: "Monthly rent",
     amount: amountStr(1200, salt),
@@ -89,6 +91,7 @@ function buildExpensesForMonth(
   });
 
   rows.push({
+    type: "expense",
     title: "Groceries",
     description: "Supermarket",
     amount: amountStr(92, salt + 1),
@@ -99,6 +102,7 @@ function buildExpensesForMonth(
   });
 
   rows.push({
+    type: "expense",
     title: "Groceries",
     description: "Weekly shop",
     amount: amountStr(78, salt + 3),
@@ -109,6 +113,7 @@ function buildExpensesForMonth(
   });
 
   rows.push({
+    type: "expense",
     title: "Groceries",
     description: "Top-up",
     amount: amountStr(45, salt + 5),
@@ -119,6 +124,7 @@ function buildExpensesForMonth(
   });
 
   rows.push({
+    type: "expense",
     title: "Transit pass",
     description: "Monthly pass",
     amount: amountStr(72, salt + 7),
@@ -129,6 +135,7 @@ function buildExpensesForMonth(
   });
 
   rows.push({
+    type: "expense",
     title: "Fuel / rides",
     description: "Commute and trips",
     amount: amountStr(48, salt + 9),
@@ -140,6 +147,7 @@ function buildExpensesForMonth(
 
   if (salt % 3 !== 0) {
     rows.push({
+      type: "expense",
       title: "Streaming / outings",
       description: "Entertainment",
       amount: amountStr(32, salt + 11),
@@ -152,6 +160,7 @@ function buildExpensesForMonth(
 
   if (salt % 2 === 0) {
     rows.push({
+      type: "expense",
       title: "Pharmacy",
       description: "Health supplies",
       amount: amountStr(28, salt + 13),
@@ -164,6 +173,7 @@ function buildExpensesForMonth(
 
   if (salt % 4 !== 1) {
     rows.push({
+      type: "expense",
       title: "Shopping",
       description: "Misc purchases",
       amount: amountStr(65, salt + 15),
@@ -175,6 +185,7 @@ function buildExpensesForMonth(
   }
 
   rows.push({
+    type: "expense",
     title: "Utilities estimate",
     description: "Electric / internet share",
     amount: amountStr(110, salt + 17),
@@ -183,6 +194,31 @@ function buildExpensesForMonth(
     paymentMethod: pickPayment(salt + 18),
     isRecurring: true,
   });
+
+  // Incomes (same block, differentiated by `type`)
+  rows.push({
+    type: "income",
+    title: "Salary",
+    description: "Monthly salary",
+    amount: amountStr(3200, salt + 19),
+    categoryId: byName("Housing"),
+    expenseDate: d(2),
+    paymentMethod: pickPayment(salt + 20),
+    isRecurring: true,
+  });
+
+  if (salt % 2 === 1) {
+    rows.push({
+      type: "income",
+      title: "Freelance",
+      description: "Extra project income",
+      amount: amountStr(650, salt + 21),
+      categoryId: byName("Shopping"),
+      expenseDate: d(20 + (salt % 5)),
+      paymentMethod: pickPayment(salt + 22),
+      isRecurring: false,
+    });
+  }
 
   return rows;
 }
@@ -220,12 +256,18 @@ async function main() {
   await db
     .delete(expenses)
     .where(
-      and(eq(expenses.userId, SEED_USER_ID), eq(expenses.organizationId, SEED_ORG_ID)),
+      and(
+        eq(expenses.userId, SEED_USER_ID),
+        eq(expenses.organizationId, SEED_ORG_ID),
+      ),
     );
   await db
     .delete(categories)
     .where(
-      and(eq(categories.userId, SEED_USER_ID), eq(categories.organizationId, SEED_ORG_ID)),
+      and(
+        eq(categories.userId, SEED_USER_ID),
+        eq(categories.organizationId, SEED_ORG_ID),
+      ),
     );
   console.log("✅ Cleared existing data");
 
@@ -246,7 +288,7 @@ async function main() {
   await db.insert(expenses).values(
     expenseRows.map((e) => ({
       ...e,
-      submittedBy: "seed@example.com",
+      submittedBy: "varelathierry@gmail.com",
       userId: SEED_USER_ID,
       organizationId: SEED_ORG_ID,
     })),

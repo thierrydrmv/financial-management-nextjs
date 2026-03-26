@@ -33,6 +33,7 @@ export default function ExpenseCard({
       })
     : null;
   const paymentLabel = formatPaymentLabel(expense.paymentMethod);
+  const isIncome = expense.type === "income";
   return (
     <Link href={`/expenses/${expense.id}`}>
       <Card className="group card-hover hover:bg-primary-foreground/10 border-solid border-gray-400 min-h-50">
@@ -66,14 +67,23 @@ export default function ExpenseCard({
               <p className="text-xs font-medium text-muted-foreground">
                 Amount
               </p>
-              <p className="text-lg font-semibold tabular-nums text-emerald-500">
+              <p
+                className={`text-lg font-semibold tabular-nums ${
+                  isIncome ? "text-primary" : "text-destructive"
+                }`}
+              >
                 {formattedAmount}
               </p>
             </div>
           </div>
         </CardHeader>
         <CardFooter className="flex flex-row flex-wrap items-center justify-between gap-2 border-t pt-4">
-          <Badge variant="secondary">{category?.name ?? "Uncategorized"}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant={isIncome ? "default" : "secondary"}>
+              {isIncome ? "Income" : "Expense"}
+            </Badge>
+            <Badge variant="secondary">{category?.name ?? "Uncategorized"}</Badge>
+          </div>
           {paymentLabel ? (
             <Badge variant="outline" className="font-normal">
               {paymentLabel}

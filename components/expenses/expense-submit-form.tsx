@@ -24,6 +24,7 @@ interface ExpenseSubmitFormProps {
 export default function ExpenseSubmitForm({
   categories,
 }: ExpenseSubmitFormProps) {
+  const [type, setType] = useState<"expense" | "income">("expense");
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [category, setCategory] = useState("");
@@ -61,14 +62,28 @@ export default function ExpenseSubmitForm({
         </div>
       )}
       <FormField
-        label="Expense Name"
+        label="Name"
         id="title"
         name="title"
-        placeholder="My expense..."
+        placeholder="My finance entry..."
         required
         onChange={() => {}}
         error={getFieldErrors("title")}
       />
+      <FormField
+        label="Type"
+        id="type"
+        name="type"
+        select
+        options={[
+          { label: "Expense", value: "expense" },
+          { label: "Income", value: "income" },
+        ]}
+        selectValue={type}
+        onValueChange={(value) => setType(value as "expense" | "income")}
+        error={getFieldErrors("type")}
+      />
+      <input type="hidden" name="type" value={type} />
       <FormField
         label="Amount"
         id="amount"
@@ -92,7 +107,7 @@ export default function ExpenseSubmitForm({
       <input type="hidden" name="categoryId" value={category} />
       <Suspense fallback={<div>Loading calendar...</div>}>
         <FormField
-          label="Expense Date"
+          label="Finance Date"
           id="expenseDate"
           name="expenseDate"
           selectedDate={date}

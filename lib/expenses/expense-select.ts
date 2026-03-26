@@ -5,6 +5,7 @@ import { connection } from "next/server";
 
 const expenseWithCategorySelect = {
   id: expenses.id,
+  type: expenses.type,
   title: expenses.title,
   description: expenses.description,
   amount: expenses.amount,

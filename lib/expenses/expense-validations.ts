@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 export const expenseSchema = z.object({
+  type: z.enum(["income", "expense"], {
+    message: "Type is required",
+  }),
+
   title: z
     .string()
     .min(3, { message: "Expense name must be at least 3 characters" })

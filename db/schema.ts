@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgEnum,
   serial,
   text,
   varchar,
@@ -9,6 +10,8 @@ import {
   boolean,
   numeric,
 } from "drizzle-orm/pg-core";
+
+export const financeTypeEnum = pgEnum("finance_type", ["income", "expense"]);
 
 // ============= EXPENSES =============
 export const expenses = pgTable(
@@ -22,6 +25,7 @@ export const expenses = pgTable(
 
     // Money
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+    type: financeTypeEnum("type").notNull().default("expense"),
 
     // Category
     categoryId: integer("category_id")

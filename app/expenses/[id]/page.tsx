@@ -35,7 +35,7 @@ export default async function Expense({
 
   if (!expense) notFound();
 
-  const { title, description, amount, paymentMethod, expenseDate, category } =
+  const { title, type, description, amount, paymentMethod, expenseDate, category } =
     expense;
 
   return (
@@ -84,6 +84,11 @@ export default async function Expense({
                     label: "Category:",
                     value: category?.name ?? "Not informed",
                     icon: TagIcon,
+                  },
+                  {
+                    label: "Type:",
+                    value: type === "income" ? "Income" : "Expense",
+                    icon: ReceiptIcon,
                   },
                   {
                     label: "Amount:",

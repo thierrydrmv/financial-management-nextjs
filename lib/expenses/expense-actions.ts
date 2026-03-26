@@ -47,6 +47,7 @@ export const addExpenseAction = async (
       };
     }
     const {
+      type,
       title,
       categoryId,
       amount,
@@ -59,6 +60,7 @@ export const addExpenseAction = async (
     // transform the data
 
     await db.insert(expenses).values({
+      type,
       title,
       categoryId,
       amount: amount.toString(),
@@ -150,6 +152,7 @@ export async function updateExpenseAction(
       };
     const rawData = {
       id: formData.get("id"),
+      type: formData.get("type"),
       title: formData.get("title"),
       description: formData.get("description") || null,
       amount: formData.get("amount"),
@@ -183,6 +186,7 @@ export async function updateExpenseAction(
     await db
       .update(expenses)
       .set({
+        type: data.type,
         title: data.title,
         description: data.description,
         amount: String(data.amount),

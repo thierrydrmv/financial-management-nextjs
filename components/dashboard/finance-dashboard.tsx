@@ -165,6 +165,7 @@ function computeFinanceDashboardData(
   for (const exp of expensesWithCategory) {
     const dt = exp.expenseDate ? new Date(exp.expenseDate) : null;
     if (!dt || Number.isNaN(dt.getTime())) continue;
+    if (exp.type !== "expense") continue;
 
     expenseYears.add(dt.getFullYear());
 

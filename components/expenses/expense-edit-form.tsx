@@ -21,6 +21,7 @@ interface ExpenseEditFormProps {
   }[];
   expense: {
     id: number;
+    type: "income" | "expense";
     title: string;
     description?: string | null;
     amount: string;
@@ -35,6 +36,7 @@ export default function ExpenseEditForm({
   categories,
   expense,
 }: ExpenseEditFormProps) {
+  const [type, setType] = useState<"income" | "expense">(expense.type);
   const [date, setDate] = useState<Date | undefined>(
     expense.expenseDate ? new Date(expense.expenseDate) : undefined,
   );
@@ -66,6 +68,7 @@ export default function ExpenseEditForm({
   return (
     <form className="space-y-6" action={formAction}>
       <input type="hidden" name="id" value={expense.id} />
+      <input type="hidden" name="type" value={type} />
 
       {message && (
         <div
@@ -81,7 +84,21 @@ export default function ExpenseEditForm({
       )}
 
       <FormField
-        label="Expense Name"
+        label="Type"
+        id="type"
+        name="type"
+        select
+        options={[
+          { label: "Expense", value: "expense" },
+          { label: "Income", value: "income" },
+        ]}
+        selectValue={type}
+        onValueChange={(value) => setType(value as "income" | "expense")}
+        error={getFieldErrors("type")}
+      />
+
+      <FormField
+        label="Finance Name"
         id="title"
         name="title"
         defaultValue={expense.title}
@@ -114,7 +131,7 @@ export default function ExpenseEditForm({
 
       <Suspense fallback={<div>Loading calendar...</div>}>
         <FormField
-          label="Expense Date"
+          label="Finance Date"
           id="expenseDate"
           name="expenseDate"
           selectedDate={date}
