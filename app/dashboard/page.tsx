@@ -1,4 +1,6 @@
 import FinanceDashboard from "@/components/dashboard/finance-dashboard";
+import { DashboardPageSkeleton } from "@/components/dashboard/dashboard-page-skeleton";
+import { Suspense } from "react";
 
 function parseYearMonth(
   rawYear: string | string[] | undefined,
@@ -28,5 +30,12 @@ export default async function Dashboard({
 }) {
   const { year: rawYear, month: rawMonth } = await searchParams;
   const { year, month } = parseYearMonth(rawYear, rawMonth);
-  return <FinanceDashboard selectedYear={year} selectedMonth={month} />;
+  return (
+    <Suspense
+      key={`${year}-${month}`}
+      fallback={<DashboardPageSkeleton />}
+    >
+      <FinanceDashboard selectedYear={year} selectedMonth={month} />
+    </Suspense>
+  );
 }
