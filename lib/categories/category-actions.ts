@@ -49,14 +49,17 @@ export const addCategoryAction = async (
       .select({ id: categories.id })
       .from(categories)
       .where(
-        and(eq(categories.userId, userId), eq(categories.name, name.trim())),
+        and(
+          eq(categories.organizationId, orgId),
+          eq(categories.name, name.trim()),
+        ),
       )
       .limit(1);
 
     if (existing.length > 0) {
       return {
         success: false,
-        message: "You already have a category with this name.",
+        message: "This organization already has a category with this name.",
         errors: { name: ["A category with this name already exists."] },
       };
     }

@@ -13,9 +13,12 @@ const initialState: FormState = {
 export function CategoryDeleteForm({
   id,
   disabled = false,
+  title,
 }: {
   id: string;
   disabled?: boolean;
+  /** Shown as native tooltip when provided (e.g. why delete is disabled). */
+  title?: string;
 }) {
   const [state, formAction, isPending] = useActionState(
     deleteCategoryAction,
@@ -47,7 +50,11 @@ export function CategoryDeleteForm({
         variant="outline"
         size="icon"
         disabled={isDisabled}
-        className="cursor-pointer hover:border-destructive hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20"
+        title={title}
+        className={cn(
+          "hover:border-destructive hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20",
+          isDisabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+        )}
       >
         <Trash2Icon className="size-4" />
       </Button>

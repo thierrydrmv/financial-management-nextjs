@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 async function EditExpenseContent({ id }: { id: string }) {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId, orgId, redirectToSignIn } = await auth();
 
   if (!userId) {
     redirectToSignIn();
@@ -17,7 +17,7 @@ async function EditExpenseContent({ id }: { id: string }) {
   const userIdSafe = userId as string;
 
   const [categories, expense] = await Promise.all([
-    getAllCategories(userIdSafe),
+    getAllCategories(userIdSafe, orgId ?? null),
     getExpenseByIdAndUser(Number(id), userIdSafe),
   ]);
 

@@ -3,7 +3,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { expenseSchema } from "./expense-validations";
 import { db } from "@/db";
-import { expenses } from "@/db/schema";
+import { categories, expenses } from "@/db/schema";
 import z from "zod";
 import { FormState } from "@/types";
 import { revalidatePath } from "next/cache";
@@ -36,6 +36,27 @@ export const addExpenseAction = async (
     const user = await currentUser();
     const userEmail = user?.primaryEmailAddress?.emailAddress || "anonymous";
     const rawFormData = Object.fromEntries(formData.entries());
+
+    // If they are adding an expense and have no categories at all, fail early with a helpful message.
+    // (The schema would otherwise just say "Category is required for expense entries".)
+    if (rawFormData.type === "expense") {
+      const hasAnyCategories = await db
+        .select({ id: categories.id })
+        .from(categories)
+        .where(eq(categories.organizationId, orgId))
+        .limit(1);
+
+      if (hasAnyCategories.length === 0) {
+        return {
+          success: false,
+          message:
+            "You need to add at least one category before submitting an expense.",
+          errors: {
+            categoryId: ["No categories available. Create one first."],
+          },
+        };
+      }
+    }
 
     // validate the data
     const validatedData = expenseSchema.safeParse(rawFormData);

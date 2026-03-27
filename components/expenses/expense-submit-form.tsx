@@ -40,6 +40,18 @@ export default function ExpenseSubmitForm({
     return (errors as Record<string, string[]>)[fieldName] ?? [];
   };
 
+  // Only block on load when there are zero categories (must create one first).
+  // Once at least one category exists, no inline error until submit (server validation).
+  const serverCategoryErrors = getFieldErrors("categoryId");
+  const localCategoryErrors: string[] =
+    type === "expense" && categories.length === 0
+      ? ["No categories available. Create one first."]
+      : [];
+  const categoryFieldErrors =
+    serverCategoryErrors.length > 0
+      ? serverCategoryErrors
+      : localCategoryErrors;
+
   const categoryOptions = categories.map((category) => ({
     label: category.name,
     value: category.id.toString(),
@@ -108,7 +120,7 @@ export default function ExpenseSubmitForm({
           options={categoryOptions}
           selectValue={category}
           onValueChange={setCategory}
-          error={getFieldErrors("categoryId")}
+          error={categoryFieldErrors}
         />
       ) : null}
       <input

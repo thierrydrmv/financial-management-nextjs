@@ -6,17 +6,32 @@ export type CategoryWithExpenseCount = Awaited<
   ReturnType<typeof getAllCategoriesWithExpenseCount>
 >[number];
 
-export async function getAllCategories(userId: string) {
+/**
+ * Lists categories for the current scope.
+ * When `organizationId` is set (user is in an org), returns all categories for that organization.
+ * Otherwise returns categories owned by `userId` (personal / legacy rows).
+ */
+export async function getAllCategories(
+  userId: string,
+  organizationId: string | null,
+) {
   const categoryData = await db
     .select()
     .from(categories)
-    .where(eq(categories.userId, userId))
+    .where(
+      organizationId
+        ? eq(categories.organizationId, organizationId)
+        : eq(categories.userId, userId),
+    )
     .orderBy(desc(categories.createdAt));
 
   return categoryData;
 }
 
-export async function getAllCategoriesWithExpenseCount(userId: string) {
+export async function getAllCategoriesWithExpenseCount(
+  userId: string,
+  organizationId: string | null,
+) {
   const result = await db
     .select({
       id: categories.id,
@@ -26,7 +41,11 @@ export async function getAllCategoriesWithExpenseCount(userId: string) {
     })
     .from(categories)
     .leftJoin(expenses, eq(expenses.categoryId, categories.id))
-    .where(eq(categories.userId, userId)) // Add this
+    .where(
+      organizationId
+        ? eq(categories.organizationId, organizationId)
+        : eq(categories.userId, userId),
+    )
     .groupBy(categories.id)
     .orderBy(desc(categories.createdAt));
   return result;

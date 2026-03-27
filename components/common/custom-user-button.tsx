@@ -12,7 +12,7 @@ export default function CustomUserButton() {
         url="/organizations"
       >
         <div className="p-4">
-          <h2>Manage Organizaition</h2>
+          <h2>Manage Organization</h2>
           <OrganizationSwitcher
             hidePersonal={true}
             afterCreateOrganizationUrl={"/submit"}
