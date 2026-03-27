@@ -1,6 +1,8 @@
 "use client";
 
+import type { ExpenseListFilters } from "@/lib/expenses/expense-select";
 import { SearchIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import {
@@ -13,10 +15,28 @@ import {
   PaginationPrevious,
 } from "../ui/pagination";
 import { ExpenseWithCategory } from "@/types";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ExpenseCard from "./expense-card";
 
-const PAGE_SIZE = 21;
+type FilterCategory = { id: number; name: string; createdAt: Date | null };
+
+function buildExpenseListUrl(
+  pathname: string,
+  state: {
+    page: number;
+    search: string;
+    type: ExpenseListFilters["type"];
+    categoryName: string | null;
+  },
+) {
+  const params = new URLSearchParams();
+  if (state.page > 1) params.set("page", String(state.page));
+  if (state.search.trim()) params.set("q", state.search.trim());
+  if (state.type !== "all") params.set("type", state.type);
+  if (state.categoryName) params.set("category", state.categoryName);
+  const qs = params.toString();
+  return qs ? `${pathname}?${qs}` : pathname;
+}
 
 /** Compact page list with ellipses when there are many pages. */
 function getPaginationRange(
@@ -41,109 +61,134 @@ function getPaginationRange(
   return out;
 }
 
+function ExpenseSearchField({
+  searchFromUrl,
+  onCommit,
+}: {
+  searchFromUrl: string;
+  onCommit: (search: string) => void;
+}) {
+  const [value, setValue] = useState(searchFromUrl);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      const trimmed = value.trim();
+      const current = searchFromUrl.trim();
+      if (trimmed === current) return;
+      onCommit(value);
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, [value, searchFromUrl, onCommit]);
+
+  return (
+    <div className="flex-1 relative">
+      <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
+      <Input
+        type="text"
+        placeholder="Search Expenses..."
+        className="pl-10"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    </div>
+  );
+}
+
 export default function ExpenseExplorer({
   expensesWithCategory,
+  totalCount,
+  page: currentPage,
+  pageSize,
+  filterCategories,
+  filters,
 }: {
   expensesWithCategory: ExpenseWithCategory[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  filterCategories: FilterCategory[];
+  filters: ExpenseListFilters;
 }) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedType, setSelectedType] = useState<
-    "all" | "expense" | "income"
-  >("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const filteredExpenses = useMemo(() => {
-    let filtered = [...expensesWithCategory];
-
-    if (selectedType !== "all") {
-      filtered = filtered.filter((expense) => expense.type === selectedType);
-    }
-
-    if (searchQuery.trim().length > 0) {
-      filtered = filtered.filter((expense) =>
-        expense.title.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-    }
-
-    if (selectedCategory) {
-      filtered = filtered.filter(
-        (expense) => expense.category?.name === selectedCategory,
-      );
-    }
-
-    return filtered;
-  }, [expensesWithCategory, searchQuery, selectedCategory, selectedType]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredExpenses.length / PAGE_SIZE),
+  const navigate = useCallback(
+    (updates: Partial<
+      ExpenseListFilters & {
+        page: number;
+      }
+    >) => {
+      const next = {
+        page: currentPage,
+        search: filters.search,
+        type: filters.type,
+        categoryName: filters.categoryName,
+        ...updates,
+      };
+      router.replace(buildExpenseListUrl(pathname, next));
+    },
+    [currentPage, filters, pathname, router],
   );
-  const effectivePage = Math.min(Math.max(1, page), totalPages);
 
-  const paginatedExpenses = useMemo(() => {
-    const start = (effectivePage - 1) * PAGE_SIZE;
-    return filteredExpenses.slice(start, start + PAGE_SIZE);
-  }, [filteredExpenses, effectivePage]);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const effectivePage = Math.min(Math.max(1, currentPage), totalPages);
 
   const rangeStart =
-    filteredExpenses.length === 0 ? 0 : (effectivePage - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(effectivePage * PAGE_SIZE, filteredExpenses.length);
+    totalCount === 0 ? 0 : (effectivePage - 1) * pageSize + 1;
+  const rangeEnd = Math.min(effectivePage * pageSize, totalCount);
 
-  const categories = useMemo(() => {
-    const unique = new Map();
-
-    expensesWithCategory.forEach((expense) => {
-      if (expense.category) {
-        unique.set(expense.category.id, expense.category);
-      }
-    });
-
-    return Array.from(unique.values());
-  }, [expensesWithCategory]);
+  const categoryButtons = useMemo(
+    () =>
+      filterCategories.map((category) => (
+        <Button
+          key={category.id}
+          onClick={() => {
+            navigate({
+              categoryName: category.name,
+              page: 1,
+            });
+          }}
+          variant={
+            filters.categoryName === category.name ? "default" : "outline"
+          }
+        >
+          {category.name}
+        </Button>
+      )),
+    [filterCategories, filters.categoryName, navigate],
+  );
 
   return (
     <div>
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <div className="flex-1 relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground size-4" />
-          <Input
-            type="text"
-            placeholder="Search Expenses..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
+        <ExpenseSearchField
+          key={filters.search}
+          searchFromUrl={filters.search}
+          onCommit={(search) => navigate({ search, page: 1 })}
+        />
       </div>
       <div className="mb-4 flex gap-2 flex-wrap">
         <Button
           onClick={() => {
-            setSelectedType("all");
-            setPage(1);
+            navigate({ type: "all", page: 1 });
           }}
-          variant={selectedType === "all" ? "default" : "outline"}
+          variant={filters.type === "all" ? "default" : "outline"}
         >
           All Types
         </Button>
         <Button
           onClick={() => {
-            setSelectedType("expense");
-            setPage(1);
+            navigate({ type: "expense", page: 1 });
           }}
-          variant={selectedType === "expense" ? "default" : "outline"}
+          variant={filters.type === "expense" ? "default" : "outline"}
         >
           Expenses
         </Button>
         <Button
           onClick={() => {
-            setSelectedType("income");
-            setPage(1);
+            navigate({ type: "income", page: 1 });
           }}
-          variant={selectedType === "income" ? "default" : "outline"}
+          variant={filters.type === "income" ? "default" : "outline"}
         >
           Income
         </Button>
@@ -151,41 +196,28 @@ export default function ExpenseExplorer({
       <div className="mb-8 flex gap-2 flex-wrap">
         <Button
           onClick={() => {
-            setSelectedCategory(null);
-            setPage(1);
+            navigate({ categoryName: null, page: 1 });
           }}
-          variant={!selectedCategory ? "default" : "outline"}
+          variant={!filters.categoryName ? "default" : "outline"}
         >
           All
         </Button>
 
-        {categories.map((category) => (
-          <Button
-            key={category.id}
-            onClick={() => {
-              setSelectedCategory(category.name);
-              setPage(1);
-            }}
-            variant={selectedCategory === category.name ? "default" : "outline"}
-          >
-            {category.name}
-          </Button>
-        ))}
+        {categoryButtons}
       </div>
       <div className="mb-6">
         <p className="text-sm text-muted-foreground">
-          {filteredExpenses.length === 0 ? (
+          {totalCount === 0 ? (
             <>No finance entries match your filters.</>
           ) : (
             <>
-              Showing {rangeStart}–{rangeEnd} of {filteredExpenses.length}{" "}
-              finance entries
+              Showing {rangeStart}–{rangeEnd} of {totalCount} finance entries
             </>
           )}
         </p>
       </div>
       <div className="grid-wrapper">
-        {paginatedExpenses.map((expense) => (
+        {expensesWithCategory.map((expense) => (
           <ExpenseCard
             key={expense.id}
             expense={expense}
@@ -206,7 +238,7 @@ export default function ExpenseExplorer({
                 }
                 onClick={(e) => {
                   e.preventDefault();
-                  setPage(Math.max(1, effectivePage - 1));
+                  navigate({ page: Math.max(1, effectivePage - 1) });
                 }}
               />
             </PaginationItem>
@@ -224,7 +256,7 @@ export default function ExpenseExplorer({
                     isActive={item === effectivePage}
                     onClick={(e) => {
                       e.preventDefault();
-                      setPage(item);
+                      navigate({ page: item });
                     }}
                   >
                     {item}
@@ -242,7 +274,9 @@ export default function ExpenseExplorer({
                 }
                 onClick={(e) => {
                   e.preventDefault();
-                  setPage(Math.min(totalPages, effectivePage + 1));
+                  navigate({
+                    page: Math.min(totalPages, effectivePage + 1),
+                  });
                 }}
               />
             </PaginationItem>
