@@ -1,94 +1,182 @@
 import { auth } from "@clerk/nextjs/server";
 import { getAllExpensesWithCategoryByUser } from "@/lib/expenses/expense-select";
 import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
+import { MonthlyAnalysisChart } from "@/components/dashboard/monthly-analysis-chart";
 import {
   categoryChartBgClassForLabel,
   categoryChartCssVarForLabel,
 } from "@/lib/dashboard/category-palette";
+import { clampNumber, niceAxisMax } from "@/lib/dashboard/chart-axis";
 import { cn } from "@/lib/utils";
 import type { ExpenseWithCategory } from "@/types";
 import { formatCurrency } from "@/lib/formatters/currency";
 
-/** Dashboard-wide: recurring = green, one-time = red (theme tokens). */
-const COLOR_RECURRING = "var(--primary)";
-const COLOR_ONE_TIME = "var(--destructive)";
-/** Deeper green for recurring-only accents (still on-brand). */
-const COLOR_RECURRING_ALT = "var(--chart-6)";
-const COLOR_TOTAL_A = "var(--chart-2)";
-const COLOR_TOTAL_B = "var(--chart-4)";
-const COLOR_SHARE_FILL = "var(--primary)";
-const COLOR_SHARE_REST = "rgba(0,0,0,0)";
-
-function MiniGradientFill({ from, to }: { from: string; to: string }) {
-  return (
-    <div
-      className="mt-3 h-14 w-full rounded-lg opacity-85"
-      style={{
-        background: `linear-gradient(to right, ${from}, ${to})`,
-        clipPath:
-          "polygon(0 55%, 8% 47%, 16% 52%, 24% 30%, 32% 45%, 40% 33%, 48% 60%, 56% 40%, 64% 57%, 72% 38%, 80% 48%, 88% 35%, 100% 52%, 100% 100%, 0 100%)",
-      }}
-    />
-  );
-}
+/** Expenses / sparkline accents (balance uses chart tokens). */
+const COLOR_EXPENSE = "var(--destructive)";
+const COLOR_EXPENSE_ALT = "var(--chart-5)";
+const COLOR_BALANCE_A = "var(--chart-2)";
+const COLOR_BALANCE_B = "var(--chart-4)";
 
 function DashboardPanel({
   title,
   children,
   className = "",
+  compact = false,
 }: {
   title: string;
   children: React.ReactNode;
   className?: string;
+  /** Tighter padding and heading — use with summary sparkline cards. */
+  compact?: boolean;
 }) {
   return (
     <section
       className={cn(
-        "rounded-2xl border border-border bg-card p-5 shadow-sm",
+        "rounded-2xl border border-border bg-card shadow-sm",
+        compact ? "p-4" : "p-5",
         className,
       )}
     >
-      <h3 className="mb-4 text-sm font-medium text-foreground">{title}</h3>
+      <h3
+        className={cn(
+          "text-sm font-medium text-foreground",
+          compact ? "mb-2" : "mb-4",
+        )}
+      >
+        {title}
+      </h3>
       {children}
     </section>
   );
 }
 
-function clampNumber(n: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, n));
-}
-
-function formatSharePercent(value: number) {
-  return `${value.toLocaleString("en-US", {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  })}%`;
-}
-
-function monthKey(d: Date) {
-  return d.getFullYear() * 12 + d.getMonth();
-}
-
-function buildConicGradient(percent: number, colorA: string, colorB: string) {
-  const p = clampNumber(percent, 0, 100);
-  return `conic-gradient(${colorA} 0 ${p}%, ${colorB} ${p}% 100%)`;
-}
-
-function buildSvgPath(values: number[]) {
+/** Line + closed area path for sparkline-style charts (values ≥ 0). */
+function buildAreaPaths(values: number[]) {
+  if (values.length === 0) {
+    return { line: "", area: "" };
+  }
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 0.0001);
+  const range = max - min || 1;
   const width = 300;
   const height = 120;
   const pad = 10;
-  const max = Math.max(...values, 0.0001);
+  const bottom = height - pad;
+  const yAt = (v: number) =>
+    height - pad - ((v - min) / range) * (height - pad * 2);
 
   const points = values.map((v, i) => {
     const x = pad + (i * (width - pad * 2)) / Math.max(values.length - 1, 1);
-    const y = height - pad - (v / max) * (height - pad * 2);
-    return { x, y };
+    return { x, y: yAt(v) };
   });
 
-  return points
+  const line = points
     .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
     .join(" ");
+  const last = points[points.length - 1]!;
+  const first = points[0]!;
+  const area = `${line} L ${last.x.toFixed(2)} ${bottom} L ${first.x.toFixed(2)} ${bottom} Z`;
+  return { line, area };
+}
+
+function buildCategoryDonutGradient(
+  segments: Array<{ amount: number; color: string }>,
+): string {
+  const total = segments.reduce((s, x) => s + x.amount, 0);
+  if (total <= 0) {
+    return "conic-gradient(var(--muted) 0% 100%)";
+  }
+  let acc = 0;
+  const stops: string[] = [];
+  for (const seg of segments) {
+    const p = (seg.amount / total) * 100;
+    const start = acc;
+    acc += p;
+    stops.push(`${seg.color} ${start}% ${acc}%`);
+  }
+  if (acc < 99.99) {
+    stops.push(
+      `color-mix(in oklab, var(--muted) 45%, transparent) ${acc}% 100%`,
+    );
+  }
+  return `conic-gradient(${stops.join(", ")})`;
+}
+
+type NamedTotal = { name: string; total: number };
+
+function donutSegmentsFromTotals(
+  totals: Map<string, NamedTotal>,
+  maxSegments = 6,
+): Array<{ name: string; amount: number; color: string }> {
+  const list = Array.from(totals.values())
+    .filter((x) => x.total > 0)
+    .sort((a, b) => b.total - a.total);
+  if (list.length === 0) return [];
+
+  const head = list.slice(0, maxSegments - 1);
+  const tail = list.slice(maxSegments - 1);
+  const other = tail.reduce((s, x) => s + x.total, 0);
+  const out: Array<{ name: string; amount: number; color: string }> = head.map(
+    (x) => ({
+      name: x.name,
+      amount: x.total,
+      color: categoryChartCssVarForLabel(x.name),
+    }),
+  );
+  if (other > 0) {
+    out.push({
+      name: "Other",
+      amount: other,
+      color: "var(--chart-12)",
+    });
+  }
+  return out;
+}
+
+function SparklineCard({
+  values,
+  stroke,
+  fill,
+  gradientId,
+  compact = false,
+}: {
+  values: number[];
+  stroke: string;
+  fill: string;
+  gradientId: string;
+  compact?: boolean;
+}) {
+  const { line, area } = buildAreaPaths(values.length ? values : [0]);
+  return (
+    <div
+      className={cn(
+        "relative w-full overflow-hidden rounded-lg border border-border/60 bg-muted/30",
+        compact ? "mt-3 h-12" : "mt-3 h-14",
+      )}
+    >
+      <svg
+        viewBox="0 0 300 120"
+        className="h-full w-full"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={fill} stopOpacity="0.35" />
+            <stop offset="100%" stopColor={fill} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={area} fill={`url(#${gradientId})`} />
+        <path
+          d={line}
+          fill="none"
+          stroke={stroke}
+          strokeWidth="2.5"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
+    </div>
+  );
 }
 
 export type FinanceDashboardProps = {
@@ -102,22 +190,22 @@ type FinanceDashboardComputed = {
   selMonth1: number;
   periodLabel: string;
   yearOptions: number[];
-  thisMonthTotal: number;
-  thisMonthRecurringTotal: number;
-  monthShareOfAnnualBasePct: number;
-  yearShareOfTotalBasePct: number;
-  calendarRecurring: number[];
-  calendarOneTime: number[];
+  monthlyIncome: number[];
+  monthlyExpense: number[];
+  balanceByMonth: number[];
+  thisMonthBalance: number;
+  thisMonthExpenseTotal: number;
+  yearExpenseTotal: number;
+  monthCategoryDonut: Array<{ name: string; amount: number; color: string }>;
+  yearCategoryDonut: Array<{ name: string; amount: number; color: string }>;
   yearlyProgress: Array<{
     label: string;
     value: number;
     colorCssVar: string;
   }>;
-  monthTop: Array<{ name: string; total: number }>;
-  monthTopMax: number;
-  maxBar: number;
-  recurringPath: string;
-  oneTimePath: string;
+  expenseBreakdown: NamedTotal[];
+  breakdownMax: number;
+  axisMax: number;
   monthLabels: string[];
 };
 
@@ -131,32 +219,12 @@ function computeFinanceDashboardData(
   const selMonth1 = clampNumber(Math.floor(rawMonth), 1, 12);
   const selMonth0 = selMonth1 - 1;
 
-  const monthStart = new Date(selYear, selMonth0, 1);
-  const monthEndExclusive = new Date(selYear, selMonth0 + 1, 1);
+  const monthlyIncome = Array.from({ length: 12 }, () => 0);
+  const monthlyExpense = Array.from({ length: 12 }, () => 0);
 
-  const calendarYearStart = new Date(selYear, 0, 1);
-  const calendarYearEndExclusive = new Date(selYear + 1, 0, 1);
-
-  const rollingStart = new Date(selYear, selMonth0 - 11, 1);
-  const rollingEndExclusive = new Date(selYear, selMonth0 + 1, 1);
-  const rollingFirstKey = monthKey(rollingStart);
-
-  const calendarRecurring = Array.from({ length: 12 }, () => 0);
-  const calendarOneTime = Array.from({ length: 12 }, () => 0);
-
-  const rollingRecurring = Array.from({ length: 12 }, () => 0);
-  const rollingOneTime = Array.from({ length: 12 }, () => 0);
-  const rollingMonthTotals = Array.from({ length: 12 }, () => 0);
-
-  let thisMonthTotal = 0;
-  let thisMonthRecurringTotal = 0;
-
-  type CategoryAgg = { name: string; total: number };
-  const categoryTotalsRolling = new Map<number, CategoryAgg>();
-  const topCategoriesThisMonth = new Map<number, CategoryAgg>();
-
-  let yearTotal = 0;
-  let allTimeTotal = 0;
+  const yearCategoryTotals = new Map<string, NamedTotal>();
+  const monthCategoryTotals = new Map<string, NamedTotal>();
+  const titleTotals = new Map<string, NamedTotal>();
 
   const expenseYears = new Set<number>();
   expenseYears.add(selYear);
@@ -165,92 +233,86 @@ function computeFinanceDashboardData(
   for (const exp of expensesWithCategory) {
     const dt = exp.expenseDate ? new Date(exp.expenseDate) : null;
     if (!dt || Number.isNaN(dt.getTime())) continue;
-    if (exp.type !== "expense") continue;
 
     expenseYears.add(dt.getFullYear());
 
     const amount = Number(exp.amount) || 0;
     if (amount === 0) continue;
 
-    allTimeTotal += amount;
+    const y = dt.getFullYear();
+    const m = dt.getMonth();
 
-    const t = dt.getTime();
+    if (y !== selYear) continue;
 
-    if (t >= monthStart.getTime() && t < monthEndExclusive.getTime()) {
-      thisMonthTotal += amount;
-      if (exp.isRecurring) thisMonthRecurringTotal += amount;
-
-      const catId = exp.category?.id;
-      const catName = exp.category?.name ?? "Uncategorized";
-      if (typeof catId === "number") {
-        const prev = topCategoriesThisMonth.get(catId);
-        topCategoriesThisMonth.set(catId, {
-          name: catName,
-          total: (prev?.total ?? 0) + amount,
-        });
-      }
+    if (exp.type === "income") {
+      monthlyIncome[m] += amount;
+      continue;
     }
 
-    if (
-      t >= calendarYearStart.getTime() &&
-      t < calendarYearEndExclusive.getTime()
-    ) {
-      const mi = dt.getMonth();
-      if (exp.isRecurring) calendarRecurring[mi] += amount;
-      else calendarOneTime[mi] += amount;
-      yearTotal += amount;
-    }
+    monthlyExpense[m] += amount;
 
-    if (t >= rollingStart.getTime() && t < rollingEndExclusive.getTime()) {
-      const idx = monthKey(dt) - rollingFirstKey;
-      if (idx >= 0 && idx < 12) {
-        rollingMonthTotals[idx] += amount;
-        if (exp.isRecurring) rollingRecurring[idx] += amount;
-        else rollingOneTime[idx] += amount;
+    const catLabel = exp.category?.name ?? "Uncategorized";
+    const prevYear = yearCategoryTotals.get(catLabel) ?? {
+      name: catLabel,
+      total: 0,
+    };
+    yearCategoryTotals.set(catLabel, {
+      name: catLabel,
+      total: prevYear.total + amount,
+    });
 
-        const catId = exp.category?.id;
-        const catName = exp.category?.name ?? "Uncategorized";
-        if (typeof catId === "number") {
-          const prev = categoryTotalsRolling.get(catId);
-          categoryTotalsRolling.set(catId, {
-            name: catName,
-            total: (prev?.total ?? 0) + amount,
-          });
-        }
-      }
+    if (m === selMonth0) {
+      const prevM = monthCategoryTotals.get(catLabel) ?? {
+        name: catLabel,
+        total: 0,
+      };
+      monthCategoryTotals.set(catLabel, {
+        name: catLabel,
+        total: prevM.total + amount,
+      });
+
+      const prevT = titleTotals.get(exp.title) ?? { name: exp.title, total: 0 };
+      titleTotals.set(exp.title, {
+        name: exp.title,
+        total: prevT.total + amount,
+      });
     }
   }
 
-  const totalRolling = rollingMonthTotals.reduce((acc, v) => acc + v, 0);
+  const balanceByMonth = monthlyIncome.map(
+    (inc, i) => inc - monthlyExpense[i]!,
+  );
 
-  const monthShareOfAnnualBasePct =
-    yearTotal > 0 ? (thisMonthTotal / yearTotal) * 100 : 0;
-  const yearShareOfTotalBasePct =
-    allTimeTotal > 0 ? (yearTotal / allTimeTotal) * 100 : 0;
+  const thisMonthExpenseTotal = monthlyExpense[selMonth0] ?? 0;
+  const thisMonthBalance = balanceByMonth[selMonth0] ?? 0;
 
-  const topCategoryRolling = Array.from(categoryTotalsRolling.entries())
-    .map(([id, agg]) => ({ id, ...agg }))
+  const yearExpenseTotal = monthlyExpense.reduce((a, b) => a + b, 0);
+
+  const monthCategoryDonut = donutSegmentsFromTotals(monthCategoryTotals, 6);
+  const yearCategoryDonut = donutSegmentsFromTotals(yearCategoryTotals, 8);
+
+  const yearlyProgress = Array.from(yearCategoryTotals.values())
+    .filter((x) => x.total > 0)
     .sort((a, b) => b.total - a.total)
-    .slice(0, 6);
-
-  const yearlyProgress = topCategoryRolling.map((item) => {
-    const share = totalRolling > 0 ? (item.total / totalRolling) * 100 : 0;
-    return {
+    .slice(0, 6)
+    .map((item) => ({
       label: item.name,
-      value: Math.round(share),
+      value:
+        yearExpenseTotal > 0
+          ? Math.round((item.total / yearExpenseTotal) * 100)
+          : 0,
       colorCssVar: categoryChartCssVarForLabel(item.name),
-    };
-  });
+    }));
 
-  const monthTop = Array.from(topCategoriesThisMonth.values())
+  const expenseBreakdown = Array.from(titleTotals.values())
+    .filter((x) => x.total > 0)
     .sort((a, b) => b.total - a.total)
-    .slice(0, 3);
-  const monthTopMax = Math.max(...monthTop.map((c) => c.total), 1);
+    .slice(0, 8);
 
-  const maxBar = Math.max(...calendarRecurring, ...calendarOneTime, 0.0001);
+  const breakdownMax = Math.max(...expenseBreakdown.map((x) => x.total), 1);
 
-  const recurringPath = buildSvgPath(rollingRecurring);
-  const oneTimePath = buildSvgPath(rollingOneTime);
+  const maxMonthlyBar = Math.max(...monthlyIncome, ...monthlyExpense, 0.0001);
+  const axisMax = niceAxisMax(maxMonthlyBar);
 
   const yearOptions = Array.from(expenseYears).sort((a, b) => a - b);
 
@@ -270,20 +332,79 @@ function computeFinanceDashboardData(
     selMonth1,
     periodLabel,
     yearOptions,
-    thisMonthTotal,
-    thisMonthRecurringTotal,
-    monthShareOfAnnualBasePct,
-    yearShareOfTotalBasePct,
-    calendarRecurring,
-    calendarOneTime,
+    monthlyIncome,
+    monthlyExpense,
+    balanceByMonth,
+    thisMonthBalance,
+    thisMonthExpenseTotal,
+    yearExpenseTotal,
+    monthCategoryDonut,
+    yearCategoryDonut,
     yearlyProgress,
-    monthTop,
-    monthTopMax,
-    maxBar,
-    recurringPath,
-    oneTimePath,
+    expenseBreakdown,
+    breakdownMax,
+    axisMax,
     monthLabels,
   };
+}
+
+function CategoryDonut({
+  title,
+  segments,
+  total,
+}: {
+  title: string;
+  total: number;
+  segments: Array<{ name: string; amount: number; color: string }>;
+}) {
+  const gradient = buildCategoryDonutGradient(segments);
+  const hasData = total > 0 && segments.length > 0;
+
+  return (
+    <DashboardPanel title={title} className="pb-6">
+      <div className="mx-auto h-32 w-32 rounded-full border-8 border-border p-1">
+        <div
+          className="flex h-full w-full items-center justify-center rounded-full bg-muted/50"
+          style={{
+            background: hasData
+              ? gradient
+              : "conic-gradient(var(--muted) 0% 100%)",
+          }}
+        >
+          <div className="flex h-18 w-18 flex-col items-center justify-center gap-0.5 rounded-full bg-card px-1 text-center">
+            <span className="text-base font-semibold tabular-nums leading-none text-card-foreground">
+              {hasData ? formatCurrency(total) : "—"}
+            </span>
+            <span className="text-[10px] leading-snug text-muted-foreground">
+              {hasData ? "Total" : "No data"}
+            </span>
+          </div>
+        </div>
+      </div>
+      {hasData && segments.length > 0 ? (
+        <ul className="mt-3 space-y-1.5 text-[10px] text-muted-foreground">
+          {segments.slice(0, 5).map((s) => (
+            <li
+              key={s.name}
+              className="flex items-center justify-between gap-2"
+            >
+              <span className="flex min-w-0 items-center gap-1.5">
+                <span
+                  className="size-2 shrink-0 rounded-sm"
+                  style={{ backgroundColor: s.color }}
+                  aria-hidden
+                />
+                <span className="truncate">{s.name}</span>
+              </span>
+              <span className="shrink-0 tabular-nums text-foreground">
+                {formatCurrency(s.amount)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </DashboardPanel>
+  );
 }
 
 export default async function FinanceDashboard({
@@ -308,19 +429,19 @@ export default async function FinanceDashboard({
     selMonth1,
     periodLabel,
     yearOptions,
-    thisMonthTotal,
-    thisMonthRecurringTotal,
-    monthShareOfAnnualBasePct,
-    yearShareOfTotalBasePct,
-    calendarRecurring,
-    calendarOneTime,
+    monthlyIncome,
+    monthlyExpense,
+    balanceByMonth,
+    thisMonthBalance,
+    thisMonthExpenseTotal,
+    monthCategoryDonut,
+    yearCategoryDonut,
     yearlyProgress,
-    monthTop,
-    monthTopMax,
-    maxBar,
-    recurringPath,
-    oneTimePath,
+    expenseBreakdown,
+    breakdownMax,
+    axisMax,
     monthLabels,
+    yearExpenseTotal,
   } = computed;
 
   return (
@@ -332,136 +453,82 @@ export default async function FinanceDashboard({
           selectedMonth={selMonth1}
         />
 
-        <main className="grid gap-4">
-          <div className="grid gap-4 xl:grid-cols-3">
-            <DashboardPanel title={`Total expenses — ${periodLabel}`}>
-              <p className="text-3xl font-bold">
-                {formatCurrency(thisMonthTotal)}
+        <main className="flex flex-col gap-6">
+          <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
+            <DashboardPanel compact title={`Monthly balance — ${periodLabel}`}>
+              <p
+                className={cn(
+                  "text-3xl font-bold tabular-nums leading-tight",
+                  thisMonthBalance >= 0 ? "text-primary" : "text-destructive",
+                )}
+              >
+                {formatCurrency(thisMonthBalance)}
               </p>
-              <MiniGradientFill from={COLOR_TOTAL_A} to={COLOR_TOTAL_B} />
-            </DashboardPanel>
-
-            <DashboardPanel title={`Recurring expenses — ${periodLabel}`}>
-              <p className="text-3xl font-bold">
-                {formatCurrency(thisMonthRecurringTotal)}
-              </p>
-              <MiniGradientFill
-                from={COLOR_RECURRING}
-                to={COLOR_RECURRING_ALT}
+              <SparklineCard
+                compact
+                values={balanceByMonth}
+                stroke={COLOR_BALANCE_A}
+                fill={COLOR_BALANCE_B}
+                gradientId="dash-spark-balance"
               />
             </DashboardPanel>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
-              <DashboardPanel
-                title={`Monthly expenses — ${periodLabel}`}
-                className="pb-6"
-              >
-                <div className="mx-auto h-32 w-32 rounded-full border-8 border-border p-1">
-                  <div
-                    className="flex h-full w-full items-center justify-center rounded-full bg-muted/50"
-                    aria-hidden
-                    style={{
-                      background: buildConicGradient(
-                        monthShareOfAnnualBasePct,
-                        COLOR_SHARE_FILL,
-                        COLOR_SHARE_REST,
-                      ),
-                    }}
-                  >
-                    <div className="flex h-18 w-18 flex-col items-center justify-center gap-0.5 rounded-full bg-card px-1 text-center">
-                      <span className="text-base font-semibold tabular-nums leading-none text-card-foreground">
-                        {formatSharePercent(monthShareOfAnnualBasePct)}
-                      </span>
-                      <span className="text-[10px] leading-snug text-muted-foreground">
-                        Share of annual base
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </DashboardPanel>
-
-              <DashboardPanel
-                title={`Annual expenses — ${selYear}`}
-                className="pb-6"
-              >
-                <div className="mx-auto h-32 w-32 rounded-full border-8 border-border p-1">
-                  <div
-                    className="flex h-full w-full items-center justify-center rounded-full bg-muted/50"
-                    style={{
-                      background: buildConicGradient(
-                        yearShareOfTotalBasePct,
-                        COLOR_SHARE_FILL,
-                        COLOR_SHARE_REST,
-                      ),
-                    }}
-                  >
-                    <div className="flex h-18 w-18 flex-col items-center justify-center gap-0.5 rounded-full bg-card px-1 text-center">
-                      <span className="text-base font-semibold tabular-nums leading-none text-card-foreground">
-                        {formatSharePercent(yearShareOfTotalBasePct)}
-                      </span>
-                      <span className="text-[10px] leading-snug text-muted-foreground">
-                        Share of total base
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </DashboardPanel>
-            </div>
+            <DashboardPanel compact title={`Monthly expenses — ${periodLabel}`}>
+              <p className="text-3xl font-bold leading-tight text-destructive tabular-nums">
+                {formatCurrency(thisMonthExpenseTotal)}
+              </p>
+              <SparklineCard
+                compact
+                values={monthlyExpense}
+                stroke={COLOR_EXPENSE}
+                fill={COLOR_EXPENSE_ALT}
+                gradientId="dash-spark-expense"
+              />
+            </DashboardPanel>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-            <DashboardPanel
-              title={`Monthly trend — ${selYear} (recurring vs one-time)`}
-            >
-              <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-2.5 shrink-0 rounded-sm bg-primary"
-                    aria-hidden
-                  />
-                  Recurring
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-2.5 shrink-0 rounded-sm bg-destructive"
-                    aria-hidden
-                  />
-                  One-time
-                </span>
-              </div>
-              <div className="flex h-52 items-end gap-2">
-                {calendarRecurring.map((recurringValue, index) => {
-                  const recurringHeight = (recurringValue / maxBar) * 100;
-                  const oneTimeHeight = (calendarOneTime[index] / maxBar) * 100;
+          <DashboardPanel title={`Monthly analysis — ${selYear}`}>
+            <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <span
+                  className="size-2.5 shrink-0 rounded-sm bg-primary"
+                  aria-hidden
+                />
+                Income
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <span
+                  className="size-2.5 shrink-0 rounded-sm bg-destructive"
+                  aria-hidden
+                />
+                Expenses
+              </span>
+            </div>
+            <MonthlyAnalysisChart
+              year={selYear}
+              monthlyIncome={monthlyIncome}
+              monthlyExpense={monthlyExpense}
+              axisMax={axisMax}
+              monthLabels={monthLabels}
+            />
+          </DashboardPanel>
 
-                  return (
-                    <div
-                      key={index}
-                      className="flex h-full flex-1 items-end gap-1"
-                    >
-                      <div
-                        className="w-1/2 rounded-t bg-primary/90"
-                        style={{ height: `${recurringHeight}%` }}
-                      />
-                      <div
-                        className="w-1/2 rounded-t bg-destructive/90"
-                        style={{ height: `${oneTimeHeight}%` }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="grid gap-4 md:grid-cols-2 md:items-start">
+            <CategoryDonut
+              title={`Expenses this month — ${periodLabel}`}
+              segments={monthCategoryDonut}
+              total={thisMonthExpenseTotal}
+            />
 
-              <div className="mt-3 grid grid-cols-12 text-center text-[10px] uppercase text-muted-foreground">
-                {monthLabels.map((month) => (
-                  <span key={month}>{month}</span>
-                ))}
-              </div>
-            </DashboardPanel>
+            <CategoryDonut
+              title={`Yearly expenses — ${selYear}`}
+              segments={yearCategoryDonut}
+              total={yearExpenseTotal}
+            />
+          </div>
 
-            <DashboardPanel
-              title={`Top categories — 12 mo. ending ${periodLabel}`}
-            >
+          <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr] lg:items-start">
+            <DashboardPanel title={`Annual share — ${selYear}`}>
               <div className="grid grid-cols-3 gap-4">
                 {yearlyProgress.map((item) => (
                   <div key={item.label} className="text-center">
@@ -492,84 +559,41 @@ export default async function FinanceDashboard({
                 ))}
               </div>
             </DashboardPanel>
-          </div>
 
-          <div className="grid gap-4 xl:grid-cols-[1.3fr_1fr]">
-            <DashboardPanel title={`Top categories — ${periodLabel}`}>
+            <DashboardPanel title={`Expense breakdown — ${periodLabel}`}>
               <div className="space-y-4">
-                {monthTop.map((item) => {
-                  const width = (item.total / monthTopMax) * 100;
-                  return (
-                    <div key={item.name}>
-                      <div className="mb-1 flex items-center justify-between text-sm">
-                        <span className="text-foreground">{item.name}</span>
-                        <span className="text-muted-foreground">
-                          {formatCurrency(item.total)}
-                        </span>
+                {expenseBreakdown.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No expense line items this month.
+                  </p>
+                ) : (
+                  expenseBreakdown.map((item) => {
+                    const width = (item.total / breakdownMax) * 100;
+                    return (
+                      <div key={item.name}>
+                        <div className="mb-1 flex items-center justify-between text-sm">
+                          <span className="truncate text-foreground">
+                            {item.name}
+                          </span>
+                          <span className="shrink-0 text-muted-foreground tabular-nums">
+                            {formatCurrency(item.total)}
+                          </span>
+                        </div>
+                        <div className="h-3 rounded-full bg-muted">
+                          <div
+                            className={cn(
+                              "h-full rounded-full",
+                              categoryChartBgClassForLabel(item.name),
+                            )}
+                            style={{
+                              width: `${clampNumber(width, 0, 100)}%`,
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-3 rounded-full bg-muted">
-                        <div
-                          className={cn(
-                            "h-full rounded-full",
-                            categoryChartBgClassForLabel(item.name),
-                          )}
-                          style={{ width: `${clampNumber(width, 0, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </DashboardPanel>
-
-            <DashboardPanel
-              title={`Recurring vs one-time — 12 mo. ending ${periodLabel}`}
-            >
-              <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-2.5 shrink-0 rounded-full border-2 border-primary"
-                    aria-hidden
-                  />
-                  Recurring
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <span
-                    className="size-2.5 shrink-0 rounded-full border-2 border-destructive"
-                    aria-hidden
-                  />
-                  One-time
-                </span>
-              </div>
-              <div className="relative h-40 overflow-hidden rounded-xl border border-border bg-muted/40 p-3">
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: [
-                      "radial-gradient(circle at 28% 0%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 52%)",
-                      "radial-gradient(circle at 72% 0%, color-mix(in oklab, var(--destructive) 14%, transparent), transparent 48%)",
-                    ].join(","),
-                  }}
-                />
-                <div className="absolute left-0 top-1/2 h-0.5 w-full bg-border" />
-                <div className="absolute bottom-8 left-0 h-0.5 w-full bg-border/80" />
-                <svg
-                  viewBox="0 0 300 120"
-                  className="relative z-10 h-full w-full"
-                >
-                  <path
-                    d={recurringPath}
-                    fill="none"
-                    stroke={COLOR_RECURRING}
-                    strokeWidth="3"
-                  />
-                  <path
-                    d={oneTimePath}
-                    fill="none"
-                    stroke={COLOR_ONE_TIME}
-                    strokeWidth="3"
-                  />
-                </svg>
+                    );
+                  })
+                )}
               </div>
             </DashboardPanel>
           </div>

@@ -34,7 +34,7 @@ export default function DashboardSidebar({
         </span>
         <div>
           <p className="text-xs text-muted-foreground">Dashboard</p>
-          <h2 className="text-sm font-semibold">Personal Finances</h2>
+          <h2 className="text-sm font-semibold">Personal Finance Dashboard</h2>
         </div>
       </div>
 
