@@ -3,7 +3,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** Full main column while the selected year is changing (sidebar stays visible). */
 export function DashboardMainFullSkeleton() {
   return (
-    <div className="flex flex-col gap-6" aria-hidden>
+    <div
+      className="flex flex-col gap-6 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-200"
+      aria-hidden
+    >
       <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
         <Skeleton className="h-36 rounded-2xl" />
         <Skeleton className="h-36 rounded-2xl" />
@@ -27,7 +30,7 @@ export function DashboardMainFullSkeleton() {
 /** Matches `FinanceDashboard` layout for initial load and year transitions. */
 export function DashboardPageSkeleton() {
   return (
-    <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
+    <div className="w-full text-foreground motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-300">
       <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[220px_1fr]">
         <aside className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="mb-8 flex items-center gap-3">

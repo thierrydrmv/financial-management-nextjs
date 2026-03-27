@@ -15,6 +15,7 @@ type DashboardSidebarProps = {
    * scoped loading (month vs year).
    */
   onNavigate?: (scope: "year" | "month", year: number, month: number) => void;
+  className?: string;
 };
 
 export default function DashboardSidebar({
@@ -22,6 +23,7 @@ export default function DashboardSidebar({
   selectedYear,
   selectedMonth,
   onNavigate,
+  className,
 }: DashboardSidebarProps) {
   const safeSelectedMonth = Math.min(12, Math.max(1, selectedMonth));
   const monthEntries = Array.from({ length: 12 }, (_, i) => {
@@ -33,7 +35,12 @@ export default function DashboardSidebar({
   });
 
   return (
-    <aside className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <aside
+      className={cn(
+        "rounded-2xl border border-border bg-card p-4 shadow-sm",
+        className,
+      )}
+    >
       <div className="mb-8 flex items-center gap-3">
         <span className="rounded-full bg-primary/15 p-2 text-primary">
           <Wallet className="h-4 w-4" />

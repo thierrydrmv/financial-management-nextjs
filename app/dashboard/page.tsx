@@ -1,11 +1,15 @@
 import FinanceDashboardClient from "@/components/dashboard/finance-dashboard-client";
-import { Suspense } from "react";
 import { DashboardPageSkeleton } from "@/components/dashboard/dashboard-page-skeleton";
+import { Suspense } from "react";
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<DashboardPageSkeleton />}>
-      <FinanceDashboardClient />
-    </Suspense>
+    <section className="py-20">
+      <div className="wrapper">
+        <Suspense fallback={<DashboardPageSkeleton />}>
+          <FinanceDashboardClient />
+        </Suspense>
+      </div>
+    </section>
   );
 }

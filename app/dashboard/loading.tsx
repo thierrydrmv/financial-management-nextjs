@@ -1,5 +1,11 @@
 import { DashboardPageSkeleton } from "@/components/dashboard/dashboard-page-skeleton";
 
 export default function Loading() {
-  return <DashboardPageSkeleton />;
+  return (
+    <section className="py-20">
+      <div className="wrapper">
+        <DashboardPageSkeleton />
+      </div>
+    </section>
+  );
 }

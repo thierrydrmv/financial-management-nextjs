@@ -262,16 +262,25 @@ export default function FinanceDashboardClient() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 text-foreground md:p-6">
+    <div className="w-full text-foreground">
       <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[220px_1fr]">
         <DashboardSidebar
           yearOptions={yearOptions}
           selectedYear={selYear}
           selectedMonth={selMonth1}
           onNavigate={navigate}
+          className={cn(
+            "motion-safe:transition-opacity motion-safe:duration-200",
+            isPending && "opacity-95",
+          )}
         />
 
-        <main className="flex flex-col gap-6">
+        <main
+          className={cn(
+            "flex flex-col gap-6 motion-safe:transition-[opacity,filter] motion-safe:duration-200 motion-safe:ease-out",
+            isPending && "opacity-90",
+          )}
+        >
           {showYearSkeleton ? (
             <DashboardMainFullSkeleton />
           ) : (
@@ -279,8 +288,8 @@ export default function FinanceDashboardClient() {
               <div className="grid gap-4 sm:grid-cols-2 sm:items-start">
                 {showMonthSkeleton ? (
                   <>
-                    <Skeleton className="h-36 rounded-2xl" />
-                    <Skeleton className="h-36 rounded-2xl" />
+                    <Skeleton className="h-36 rounded-2xl motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-200" />
+                    <Skeleton className="h-36 rounded-2xl motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-200" />
                   </>
                 ) : (
                   <>
@@ -354,7 +363,7 @@ export default function FinanceDashboardClient() {
 
               <div className="grid gap-4 md:grid-cols-2 md:items-start">
                 {showMonthSkeleton ? (
-                  <Skeleton className="h-64 rounded-2xl" />
+                  <Skeleton className="h-64 rounded-2xl motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-200" />
                 ) : (
                   <CategoryDonut
                     title={`Expenses this month — ${periodLabel}`}
@@ -404,7 +413,7 @@ export default function FinanceDashboardClient() {
                 </DashboardPanel>
 
                 {showMonthSkeleton ? (
-                  <Skeleton className="min-h-64 rounded-2xl" />
+                  <Skeleton className="min-h-64 rounded-2xl motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-200" />
                 ) : (
                   <DashboardPanel title={`Expense breakdown — ${periodLabel}`}>
                     <div className="space-y-4">
