@@ -10,12 +10,18 @@ type DashboardSidebarProps = {
   yearOptions: number[];
   selectedYear: number;
   selectedMonth: number;
+  /**
+   * When set, links use client navigation with scope so the dashboard can show
+   * scoped loading (month vs year).
+   */
+  onNavigate?: (scope: "year" | "month", year: number, month: number) => void;
 };
 
 export default function DashboardSidebar({
   yearOptions,
   selectedYear,
   selectedMonth,
+  onNavigate,
 }: DashboardSidebarProps) {
   const safeSelectedMonth = Math.min(12, Math.max(1, selectedMonth));
   const monthEntries = Array.from({ length: 12 }, (_, i) => {
@@ -48,6 +54,12 @@ export default function DashboardSidebar({
               <Link
                 key={y}
                 href={dashboardHref(y, safeSelectedMonth)}
+                onClick={(e) => {
+                  if (onNavigate) {
+                    e.preventDefault();
+                    onNavigate("year", y, safeSelectedMonth);
+                  }
+                }}
                 className={cn(
                   "block w-full rounded-md px-3 py-1 text-left transition-colors",
                   y === selectedYear
@@ -70,6 +82,12 @@ export default function DashboardSidebar({
               <Link
                 key={index1}
                 href={dashboardHref(selectedYear, index1)}
+                onClick={(e) => {
+                  if (onNavigate) {
+                    e.preventDefault();
+                    onNavigate("month", selectedYear, index1);
+                  }
+                }}
                 className={cn(
                   "block w-full rounded-md px-3 py-1 text-left transition-colors",
                   index1 === safeSelectedMonth
