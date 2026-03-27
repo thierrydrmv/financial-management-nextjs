@@ -15,8 +15,15 @@ import {
   PaginationPrevious,
 } from "../ui/pagination";
 import { ExpenseWithCategory } from "@/types";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import ExpenseCard from "./expense-card";
+import ExpenseExplorerCardsSkeleton from "./expense-explorer-cards-skeleton";
 
 type FilterCategory = { id: number; name: string; createdAt: Date | null };
 
@@ -111,13 +118,16 @@ export default function ExpenseExplorer({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isListPending, startListTransition] = useTransition();
 
   const navigate = useCallback(
-    (updates: Partial<
-      ExpenseListFilters & {
-        page: number;
-      }
-    >) => {
+    (
+      updates: Partial<
+        ExpenseListFilters & {
+          page: number;
+        }
+      >,
+    ) => {
       const next = {
         page: currentPage,
         search: filters.search,
@@ -125,7 +135,9 @@ export default function ExpenseExplorer({
         categoryName: filters.categoryName,
         ...updates,
       };
-      router.replace(buildExpenseListUrl(pathname, next));
+      startListTransition(() => {
+        router.replace(buildExpenseListUrl(pathname, next), { scroll: false });
+      });
     },
     [currentPage, filters, pathname, router],
   );
@@ -133,8 +145,7 @@ export default function ExpenseExplorer({
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const effectivePage = Math.min(Math.max(1, currentPage), totalPages);
 
-  const rangeStart =
-    totalCount === 0 ? 0 : (effectivePage - 1) * pageSize + 1;
+  const rangeStart = totalCount === 0 ? 0 : (effectivePage - 1) * pageSize + 1;
   const rangeEnd = Math.min(effectivePage * pageSize, totalCount);
 
   const categoryButtons = useMemo(
@@ -206,7 +217,9 @@ export default function ExpenseExplorer({
         {categoryButtons}
       </div>
       <div className="mb-6">
-        <p className="text-sm text-muted-foreground">
+        <p
+          className={`text-sm text-muted-foreground transition-opacity ${isListPending ? "opacity-50" : ""}`}
+        >
           {totalCount === 0 ? (
             <>No finance entries match your filters.</>
           ) : (
@@ -216,17 +229,23 @@ export default function ExpenseExplorer({
           )}
         </p>
       </div>
-      <div className="grid-wrapper">
-        {expensesWithCategory.map((expense) => (
-          <ExpenseCard
-            key={expense.id}
-            expense={expense}
-            category={expense.category}
-          />
-        ))}
-      </div>
+      {isListPending ? (
+        <ExpenseExplorerCardsSkeleton count={pageSize} />
+      ) : (
+        <div className="grid-wrapper">
+          {expensesWithCategory.map((expense) => (
+            <ExpenseCard
+              key={expense.id}
+              expense={expense}
+              category={expense.category}
+            />
+          ))}
+        </div>
+      )}
       {totalPages > 1 ? (
-        <Pagination className="mt-10">
+        <Pagination
+          className={`mt-10 transition-opacity ${isListPending ? "opacity-50 pointer-events-none" : ""}`}
+        >
           <PaginationContent className="flex-wrap justify-center gap-1">
             <PaginationItem>
               <PaginationPrevious
