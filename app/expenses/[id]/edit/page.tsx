@@ -4,14 +4,14 @@ import { getAllCategories } from "@/lib/categories/category-select";
 import { getExpenseByIdAndUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import { BanknoteArrowUp } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 async function EditExpenseContent({ id }: { id: string }) {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    redirect("/");
   }
   if (!id || Number.isNaN(Number(id))) notFound();
   const userIdSafe = userId as string;

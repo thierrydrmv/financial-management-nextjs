@@ -1,3 +1,4 @@
+import { LandingAuthPromo } from "@/components/landing-page/landing-auth-promo";
 import SectionHeader from "../common/section-header";
 import { ArrowUpRightIcon, Calendar, CalendarIcon } from "lucide-react";
 import { Button } from "../ui/button";
@@ -8,10 +9,19 @@ import ExpenseCard from "../expenses/expense-card";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function MonthExpenses() {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    return (
+      <section className="py-20 bg-muted/20">
+        <div className="wrapper">
+          <LandingAuthPromo
+            headline="Plan the month ahead with totals you can trust"
+            subheadline="Roll up rent, subscriptions, and fun spending into one dashboard so you can set goals and stay on track—month after month."
+          />
+        </div>
+      </section>
+    );
   }
   const userIdSafe = userId as string;
   const monthExpenses = await getLastMonthExpensesByUser(userIdSafe);

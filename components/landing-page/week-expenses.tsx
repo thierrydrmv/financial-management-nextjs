@@ -1,3 +1,4 @@
+import { LandingAuthPromo } from "@/components/landing-page/landing-auth-promo";
 import { ArrowUpRightIcon, CalendarIcon, DollarSign } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import { Button } from "../ui/button";
@@ -8,10 +9,19 @@ import ExpenseCard from "../expenses/expense-card";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function WeekExpenses() {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    return (
+      <section className="py-20">
+        <div className="wrapper">
+          <LandingAuthPromo
+            headline="Turn a week of receipts into a clear spending story"
+            subheadline="See patterns across the last seven days, compare categories, and adjust habits—without spreadsheets or guesswork."
+          />
+        </div>
+      </section>
+    );
   }
   const userIdSafe = userId as string;
   const weekExpenses = await getLastWeekExpensesByUser(userIdSafe);

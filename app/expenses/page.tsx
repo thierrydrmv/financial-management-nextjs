@@ -9,6 +9,7 @@ import {
 } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import { CompassIcon } from "lucide-react";
+import { redirect } from "next/navigation";
 
 function parseExpenseListSearchParams(
   raw: Record<string, string | string[] | undefined>,
@@ -42,10 +43,10 @@ export default async function ExplorePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    redirect("/");
   }
   const userIdSafe = userId as string;
   const raw = await searchParams;

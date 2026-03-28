@@ -2,14 +2,15 @@ import CategoryList from "@/components/categories/category-list";
 import CategorySubmitForm from "@/components/categories/category-submit-form";
 import SectionHeader from "@/components/common/section-header";
 import { getAllCategoriesWithExpenseCount } from "@/lib/categories/category-select";
-import { SparkleIcon } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
+import { SparkleIcon } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function Categories() {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    redirect("/");
   }
   const userIdSafe = userId as string;
   const categories = await getAllCategoriesWithExpenseCount(userIdSafe);

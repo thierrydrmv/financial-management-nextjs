@@ -1,3 +1,4 @@
+import { LandingAuthPromo } from "@/components/landing-page/landing-auth-promo";
 import { CalendarIcon, Clock } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import EmptyState from "../common/empty-state";
@@ -6,10 +7,19 @@ import { getTodayExpensesByUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function TodayExpenses() {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    return (
+      <section className="py-20 bg-muted/20">
+        <div className="wrapper">
+          <LandingAuthPromo
+            headline="Know what you spend today—before the day ends"
+            subheadline="Wealth Track helps you capture income and expenses as they happen, so you always see the full picture of your daily money flow."
+          />
+        </div>
+      </section>
+    );
   }
   const userIdSafe = userId as string;
   const todayExpenses = await getTodayExpensesByUser(userIdSafe);

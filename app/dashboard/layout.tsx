@@ -3,14 +3,17 @@ import { getAllExpensesWithCategoryByUser } from "@/lib/expenses/expense-select"
 import { serializeExpensesForClient } from "@/lib/dashboard/serialize-expenses";
 import { auth } from "@clerk/nextjs/server";
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const { userId, redirectToSignIn } = await auth();
-  if (!userId) redirectToSignIn();
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/");
+  }
   const userIdSafe = userId as string;
 
   const expenses = await getAllExpensesWithCategoryByUser(userIdSafe);

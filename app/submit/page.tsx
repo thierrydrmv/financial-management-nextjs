@@ -1,14 +1,15 @@
 import SectionHeader from "@/components/common/section-header";
 import ExpenseSubmitForm from "@/components/expenses/expense-submit-form";
 import { getAllCategories } from "@/lib/categories/category-select";
-import { BanknoteArrowUp } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
+import { BanknoteArrowUp } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function SubmitPage() {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
   if (!userId) {
-    redirectToSignIn();
+    redirect("/");
   }
   const userIdSafe = userId as string;
   const categories = await getAllCategories(userIdSafe);

@@ -14,16 +14,18 @@ import {
   WalletIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function Expense({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { userId, redirectToSignIn } = await auth();
+  const { userId } = await auth();
 
-  if (!userId) redirectToSignIn();
+  if (!userId) {
+    redirect("/");
+  }
   const { id } = await params;
 
   if (!id || Number.isNaN(Number(id))) {
