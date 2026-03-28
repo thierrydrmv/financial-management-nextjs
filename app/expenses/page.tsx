@@ -3,8 +3,7 @@ import { PreviewModeBanner } from "@/components/demo/preview-mode-banner";
 import ExpenseExplorer from "@/components/expenses/expense-explorer";
 import { EXPENSE_LIST_PAGE_SIZE } from "@/lib/expenses/expense-list-constants";
 import {
-  getPreviewExpensesPageSlice,
-  PREVIEW_EXPENSE_FILTERS,
+  getPreviewExpensesPaginated,
   PREVIEW_FILTER_CATEGORIES,
 } from "@/lib/demo/preview-data";
 import {
@@ -48,10 +47,16 @@ export default async function ExplorePage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const raw = await searchParams;
+  const { page: pageFromUrl, filters } = parseExpenseListSearchParams(raw);
   const { userId } = await auth();
 
   if (!userId) {
-    const { expenses, totalCount } = getPreviewExpensesPageSlice();
+    const { expenses, totalCount, page } = getPreviewExpensesPaginated(
+      filters,
+      pageFromUrl,
+      EXPENSE_LIST_PAGE_SIZE,
+    );
     return (
       <div className="py-20">
         <div className="wrapper">
@@ -64,13 +69,12 @@ export default async function ExplorePage({
             />
           </div>
           <ExpenseExplorer
-            isPreview
             expensesWithCategory={expenses}
             totalCount={totalCount}
-            page={1}
+            page={page}
             pageSize={EXPENSE_LIST_PAGE_SIZE}
             filterCategories={PREVIEW_FILTER_CATEGORIES}
-            filters={PREVIEW_EXPENSE_FILTERS}
+            filters={filters}
           />
         </div>
       </div>
@@ -78,8 +82,6 @@ export default async function ExplorePage({
   }
 
   const userIdSafe = userId as string;
-  const raw = await searchParams;
-  const { page: pageFromUrl, filters } = parseExpenseListSearchParams(raw);
 
   const totalCount = await countExpensesWithCategoryForUser(
     userIdSafe,

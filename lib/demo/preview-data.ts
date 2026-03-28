@@ -8,11 +8,12 @@ import type { ExpenseWithCategory } from "@/types";
 /**
  * Deterministic demo dataset for signed-out preview (dashboard, expenses list, categories).
  * Invariants checked against dashboard math (current calendar year `y`):
- * - March: income $450 (Freelance) − expenses $32.10 (Pharmacy) ⇒ monthly balance $417.90.
- * - Category counts match `buildMockExpenses()` (Food 4, Transport 3, Housing 5, Entertainment 4, Health 2).
- * - Housing is spread across the year (rent, utilities, supplies, internet, insurance); March has no housing row so the March balance invariant stays true.
+ * - March: income $450 (Freelance) − expenses $32.10 (Pharmacy) ⇒ monthly balance $417.90 (no extra March expense rows).
+ * - Category counts match `buildMockExpenses()` (see `PREVIEW_CATEGORIES_WITH_COUNT`).
+ * - Housing is spread across the year; March has no extra housing rows for the balance story.
  * - `getLandingHeroPreviewStats()` matches the same dataset for the signed-out home hero.
  * - `getLandingPreview*Expenses()` remap demo rows onto rolling dates for the signed-out home sections.
+ * - Enough rows that demo `/expenses` paginates at `EXPENSE_LIST_PAGE_SIZE` (same as signed-in).
  */
 const demoYear = () => new Date().getFullYear();
 
@@ -261,18 +262,230 @@ export function buildMockExpenses(): ExpenseWithCategory[] {
       category: null,
       expenseDate: new Date(y, 11, 15),
     }),
+    // Extra demo rows (no March dates) so the signed-out list paginates at EXPENSE_LIST_PAGE_SIZE.
+    mockExpense({
+      id: 9022,
+      type: "expense",
+      title: "Snacks",
+      amount: "15.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 0, 15),
+    }),
+    mockExpense({
+      id: 9023,
+      type: "expense",
+      title: "Parking",
+      amount: "12.00",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 0, 22),
+    }),
+    mockExpense({
+      id: 9024,
+      type: "expense",
+      title: "Movie night",
+      amount: "22.00",
+      categoryId: 4,
+      category: c.fun,
+      expenseDate: new Date(y, 1, 1),
+    }),
+    mockExpense({
+      id: 9025,
+      type: "expense",
+      title: "Bus fare",
+      amount: "3.50",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 1, 8),
+    }),
+    mockExpense({
+      id: 9026,
+      type: "expense",
+      title: "Vitamins",
+      amount: "18.00",
+      categoryId: 5,
+      category: c.health,
+      expenseDate: new Date(y, 1, 18),
+    }),
+    mockExpense({
+      id: 9027,
+      type: "expense",
+      title: "Lunch meeting",
+      amount: "14.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 3, 4),
+    }),
+    mockExpense({
+      id: 9028,
+      type: "expense",
+      title: "Trash pickup",
+      amount: "35.00",
+      categoryId: 3,
+      category: c.housing,
+      expenseDate: new Date(y, 3, 20),
+    }),
+    mockExpense({
+      id: 9029,
+      type: "expense",
+      title: "Toll road",
+      amount: "6.00",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 4, 2),
+    }),
+    mockExpense({
+      id: 9030,
+      type: "expense",
+      title: "Video game",
+      amount: "59.99",
+      categoryId: 4,
+      category: c.fun,
+      expenseDate: new Date(y, 4, 25),
+    }),
+    mockExpense({
+      id: 9031,
+      type: "expense",
+      title: "Ice cream",
+      amount: "8.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 5, 15),
+    }),
+    mockExpense({
+      id: 9032,
+      type: "expense",
+      title: "Car wash",
+      amount: "15.00",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 5, 22),
+    }),
+    mockExpense({
+      id: 9033,
+      type: "expense",
+      title: "Light bulbs",
+      amount: "12.00",
+      categoryId: 3,
+      category: c.housing,
+      expenseDate: new Date(y, 6, 7),
+    }),
+    mockExpense({
+      id: 9034,
+      type: "expense",
+      title: "Eye exam copay",
+      amount: "75.00",
+      categoryId: 5,
+      category: c.health,
+      expenseDate: new Date(y, 6, 18),
+    }),
+    mockExpense({
+      id: 9035,
+      type: "expense",
+      title: "BBQ supplies",
+      amount: "55.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 7, 1),
+    }),
+    mockExpense({
+      id: 9036,
+      type: "expense",
+      title: "Metro card top-up",
+      amount: "20.00",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 7, 25),
+    }),
+    mockExpense({
+      id: 9037,
+      type: "expense",
+      title: "Hotel weekend",
+      amount: "200.00",
+      categoryId: 4,
+      category: c.fun,
+      expenseDate: new Date(y, 8, 5),
+    }),
+    mockExpense({
+      id: 9038,
+      type: "expense",
+      title: "Salad bar",
+      amount: "11.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 8, 14),
+    }),
+    mockExpense({
+      id: 9039,
+      type: "expense",
+      title: "HVAC filter",
+      amount: "45.00",
+      categoryId: 3,
+      category: c.housing,
+      expenseDate: new Date(y, 9, 1),
+    }),
+    mockExpense({
+      id: 9040,
+      type: "expense",
+      title: "Music subscription",
+      amount: "10.99",
+      categoryId: 4,
+      category: c.fun,
+      expenseDate: new Date(y, 9, 10),
+      isRecurring: true,
+    }),
+    mockExpense({
+      id: 9041,
+      type: "expense",
+      title: "Scooter rental",
+      amount: "7.00",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 9, 22),
+    }),
+    mockExpense({
+      id: 9042,
+      type: "expense",
+      title: "Holiday pie",
+      amount: "22.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 10, 3),
+    }),
+    mockExpense({
+      id: 9043,
+      type: "expense",
+      title: "Flu shot",
+      amount: "0.00",
+      categoryId: 5,
+      category: c.health,
+      expenseDate: new Date(y, 10, 18),
+    }),
+    mockExpense({
+      id: 9044,
+      type: "expense",
+      title: "Wine tasting",
+      amount: "34.00",
+      categoryId: 1,
+      category: c.food,
+      expenseDate: new Date(y, 11, 1),
+    }),
+    mockExpense({
+      id: 9045,
+      type: "expense",
+      title: "Airport taxi",
+      amount: "28.00",
+      categoryId: 2,
+      category: c.transport,
+      expenseDate: new Date(y, 11, 20),
+    }),
   ];
 }
 
 export function getPreviewSerializedExpenses(): SerializedExpenseWithCategory[] {
   return serializeExpensesForClient(buildMockExpenses());
 }
-
-export const PREVIEW_EXPENSE_FILTERS: ExpenseListFilters = {
-  type: "all",
-  search: "",
-  categoryName: null,
-};
 
 const previewCategoryCreatedAt = new Date(demoYear(), 0, 1);
 
@@ -288,41 +501,84 @@ export const PREVIEW_FILTER_CATEGORIES: {
   { id: 5, name: "Health", createdAt: previewCategoryCreatedAt },
 ];
 
-export function getPreviewExpensesPageSlice(): {
+/**
+ * Applies the same rules as `buildExpenseListWhere` + `desc(expenseDate)` on mock rows.
+ */
+export function filterMockExpensesList(
+  filters: ExpenseListFilters,
+): ExpenseWithCategory[] {
+  let rows = buildMockExpenses();
+
+  if (filters.type !== "all") {
+    rows = rows.filter((e) => e.type === filters.type);
+  }
+  if (filters.categoryName) {
+    rows = rows.filter((e) => e.category?.name === filters.categoryName);
+  }
+  const q = filters.search.trim();
+  if (q.length > 0) {
+    const ql = q.toLowerCase();
+    rows = rows.filter((e) => e.title.toLowerCase().includes(ql));
+  }
+
+  rows.sort((a, b) => {
+    const ta = new Date(a.expenseDate).getTime();
+    const tb = new Date(b.expenseDate).getTime();
+    return tb - ta;
+  });
+
+  return rows;
+}
+
+/** Paginated demo list for signed-out `/expenses` (URL filters + `page` match the signed-in path). */
+export function getPreviewExpensesPaginated(
+  filters: ExpenseListFilters,
+  pageFromUrl: number,
+  pageSize: number = EXPENSE_LIST_PAGE_SIZE,
+): {
   expenses: ExpenseWithCategory[];
   totalCount: number;
+  page: number;
 } {
-  const all = buildMockExpenses();
-  const totalCount = all.length;
-  const expenses = all.slice(0, EXPENSE_LIST_PAGE_SIZE);
-  return { expenses, totalCount };
+  const filtered = filterMockExpensesList(filters);
+  const totalCount = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const page = Math.min(Math.max(1, pageFromUrl), totalPages);
+  const offset = (page - 1) * pageSize;
+  const expenses = filtered.slice(offset, offset + pageSize);
+  return { expenses, totalCount, page };
 }
 
 export const PREVIEW_CATEGORIES_WITH_COUNT: CategoryWithExpenseCount[] = [
-  { id: 1, name: "Food", createdAt: previewCategoryCreatedAt, expenseCount: 4 },
+  {
+    id: 1,
+    name: "Food",
+    createdAt: previewCategoryCreatedAt,
+    expenseCount: 11,
+  },
   {
     id: 2,
     name: "Transport",
     createdAt: previewCategoryCreatedAt,
-    expenseCount: 3,
+    expenseCount: 10,
   },
   {
     id: 3,
     name: "Housing",
     createdAt: previewCategoryCreatedAt,
-    expenseCount: 5,
+    expenseCount: 8,
   },
   {
     id: 4,
     name: "Entertainment",
     createdAt: previewCategoryCreatedAt,
-    expenseCount: 4,
+    expenseCount: 8,
   },
   {
     id: 5,
     name: "Health",
     createdAt: previewCategoryCreatedAt,
-    expenseCount: 2,
+    expenseCount: 5,
   },
 ];
 

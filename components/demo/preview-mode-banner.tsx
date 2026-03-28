@@ -6,7 +6,11 @@ type Props = {
   className?: string;
 };
 
-/** Callout so signed-out visitors know they’re seeing demo data, not their account. */
+/**
+ * Callout for signed-out demo views. Intentionally has **no** Sign in / Sign up
+ * buttons — the global header already provides those; duplicating them here was
+ * removed to avoid clutter and conflicting CTAs.
+ */
 export function PreviewModeBanner({ className }: Props) {
   return (
     <div
@@ -33,7 +37,9 @@ export function PreviewModeBanner({ className }: Props) {
             This screen shows sample data so you can explore the product.{" "}
             <span className="font-medium">
               Nothing here is saved and it is not your account.
-            </span>
+            </span>{" "}
+            When you are ready, use <span className="font-medium">Sign in</span>{" "}
+            or <span className="font-medium">Sign up</span> in the header.
           </p>
         </div>
       </div>

@@ -79,6 +79,10 @@ function ExpenseSearchField({
   const [value, setValue] = useState(searchFromUrl);
 
   useEffect(() => {
+    setValue(searchFromUrl);
+  }, [searchFromUrl]);
+
+  useEffect(() => {
     const t = window.setTimeout(() => {
       const trimmed = value.trim();
       const current = searchFromUrl.trim();
@@ -109,7 +113,6 @@ export default function ExpenseExplorer({
   pageSize,
   filterCategories,
   filters,
-  isPreview = false,
 }: {
   expensesWithCategory: ExpenseWithCategory[];
   totalCount: number;
@@ -117,8 +120,6 @@ export default function ExpenseExplorer({
   pageSize: number;
   filterCategories: FilterCategory[];
   filters: ExpenseListFilters;
-  /** Demo data: filters/search don’t update the URL; cards still link to detail preview. */
-  isPreview?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -132,7 +133,6 @@ export default function ExpenseExplorer({
         }
       >,
     ) => {
-      if (isPreview) return;
       const next = {
         page: currentPage,
         search: filters.search,
@@ -144,7 +144,7 @@ export default function ExpenseExplorer({
         router.replace(buildExpenseListUrl(pathname, next), { scroll: false });
       });
     },
-    [currentPage, filters, isPreview, pathname, router],
+    [currentPage, filters, pathname, router],
   );
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -174,31 +174,16 @@ export default function ExpenseExplorer({
     [filterCategories, filters.categoryName, navigate],
   );
 
-  const previewControlsClass = isPreview
-    ? "pointer-events-none select-none opacity-90"
-    : "";
-
   return (
-    <div data-preview={isPreview ? "true" : undefined}>
-      {isPreview ? (
-        <p className="mb-6 text-center text-xs font-medium text-muted-foreground">
-          Sample data — click a card to view details. Sign in to use search,
-          filters, and your real expenses.
-        </p>
-      ) : null}
-      <div
-        className={cn(
-          "mb-8 flex flex-col gap-4 sm:flex-row",
-          previewControlsClass,
-        )}
-      >
+    <div>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row">
         <ExpenseSearchField
           key={filters.search}
           searchFromUrl={filters.search}
           onCommit={(search) => navigate({ search, page: 1 })}
         />
       </div>
-      <div className={cn("mb-4 flex flex-wrap gap-2", previewControlsClass)}>
+      <div className="mb-4 flex flex-wrap gap-2">
         <Button
           onClick={() => {
             navigate({ type: "all", page: 1 });
@@ -224,7 +209,7 @@ export default function ExpenseExplorer({
           Income
         </Button>
       </div>
-      <div className={cn("mb-8 flex flex-wrap gap-2", previewControlsClass)}>
+      <div className="mb-8 flex flex-wrap gap-2">
         <Button
           onClick={() => {
             navigate({ categoryName: null, page: 1 });
@@ -267,7 +252,6 @@ export default function ExpenseExplorer({
           className={cn(
             "mt-10 transition-opacity",
             isListPending && "pointer-events-none opacity-50",
-            isPreview && "pointer-events-none opacity-90",
           )}
         >
           <PaginationContent className="flex-wrap justify-center gap-1">
