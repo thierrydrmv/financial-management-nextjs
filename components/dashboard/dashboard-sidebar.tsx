@@ -61,6 +61,7 @@ export default function DashboardSidebar({
               <Link
                 key={y}
                 href={dashboardHref(y, safeSelectedMonth)}
+                scroll={false}
                 onClick={(e) => {
                   if (onNavigate) {
                     e.preventDefault();
@@ -89,6 +90,7 @@ export default function DashboardSidebar({
               <Link
                 key={index1}
                 href={dashboardHref(selectedYear, index1)}
+                scroll={false}
                 onClick={(e) => {
                   if (onNavigate) {
                     e.preventDefault();

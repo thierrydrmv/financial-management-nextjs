@@ -257,7 +257,7 @@ export default function FinanceDashboardClient() {
       seq: (p?.seq ?? 0) + 1,
     }));
     startTransition(() => {
-      router.push(`/dashboard?year=${y}&month=${m}`);
+      router.push(`/dashboard?year=${y}&month=${m}`, { scroll: false });
     });
   };
 
