@@ -78,12 +78,15 @@ export default function Header() {
             >
               <Show when="signed-out">
                 <SignInButton mode="modal">
-                  <button type="button" className={navLinkClass}>
+                  <button
+                    type="button"
+                    className={`${navLinkClass} cursor-pointer`}
+                  >
                     Sign in
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <Button>Sign Up</Button>
+                  <Button className="cursor-pointer">Sign Up</Button>
                 </SignUpButton>
               </Show>
               <Show when="signed-in">

@@ -10,7 +10,11 @@ export function HeroPrimaryCtas() {
     <div className="mb-16 flex flex-col gap-4 sm:flex-row">
       <Show when="signed-out">
         <SignInButton mode="modal">
-          <Button size="lg" type="button" className="px-8 text-base shadow-lg">
+          <Button
+            size="lg"
+            type="button"
+            className="px-8 text-base shadow-lg cursor-pointer"
+          >
             <BanknoteArrowUp className="size-5" />
             Add Expense
           </Button>
