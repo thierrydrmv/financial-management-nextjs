@@ -1,13 +1,13 @@
+import { PreviewModeBanner } from "@/components/demo/preview-mode-banner";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import type { LandingHeroPreviewStats } from "@/lib/demo/preview-data";
 import {
-  ArrowRightIcon,
-  BanknoteArrowUp,
   EyeIcon,
+  Tags,
   UsersIcon,
   DollarSign,
 } from "lucide-react";
+import { HeroPrimaryCtas } from "./hero-primary-ctas";
 import StatsCard from "./stats-card";
 
 const LiveBadge = () => {
@@ -27,7 +27,7 @@ const LiveBadge = () => {
   );
 };
 
-const statsData = [
+const defaultStatsData = [
   {
     icon: DollarSign,
     value: "2.5K+",
@@ -47,7 +47,36 @@ const statsData = [
   },
 ];
 
-export default function HeroSection() {
+function previewStatsData(s: LandingHeroPreviewStats) {
+  return [
+    {
+      icon: DollarSign,
+      value: s.transactions,
+      label: "Demo transactions",
+    },
+    {
+      icon: Tags,
+      value: s.categories,
+      label: "Categories",
+      hasBorder: true,
+    },
+    {
+      icon: EyeIcon,
+      value: s.expensesLogged,
+      label: "Expense entries",
+      hasBorder: true,
+    },
+  ];
+}
+
+type HeroSectionProps = {
+  /** When set (signed-out home), hero stats and preview banner use demo data. */
+  heroPreview?: LandingHeroPreviewStats | null;
+};
+
+export default function HeroSection({ heroPreview = null }: HeroSectionProps) {
+  const statsData = heroPreview ? previewStatsData(heroPreview) : defaultStatsData;
+
   return (
     <section className="relative overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
       <div className="wrapper">
@@ -61,30 +90,17 @@ export default function HeroSection() {
             finances. WealthTrack helps you understand where your money goes and
             make smarter financial decisions.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 mb-16">
-            <Button asChild size="lg" className="text-base px-8 shadow-lg">
-              <Link href="/submit">
-                <BanknoteArrowUp className="size-5" />
-                Add Expense
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              className="text-base px-8 shadow-lg"
-              variant="secondary"
-            >
-              <Link href="/dashboard">
-                View Dashboard
-                <ArrowRightIcon className="size-5" />
-              </Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-12 max-w-2xl w-full">
+          <HeroPrimaryCtas />
+          <div className="grid w-full max-w-2xl grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-12">
             {statsData.map((stat) => (
               <StatsCard key={stat.label} {...stat} />
             ))}
           </div>
+          {heroPreview ? (
+            <div className="mt-10 w-full max-w-2xl text-left">
+              <PreviewModeBanner className="mb-0" />
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

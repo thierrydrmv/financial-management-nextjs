@@ -1,9 +1,9 @@
-import { LandingAuthPromo } from "@/components/landing-page/landing-auth-promo";
 import SectionHeader from "../common/section-header";
 import { ArrowUpRightIcon, Calendar, CalendarIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
+import { getLandingPreviewMonthExpenses } from "@/lib/demo/preview-data";
 import { getLastMonthExpensesByUser } from "@/lib/expenses/expense-select";
 import ExpenseCard from "../expenses/expense-card";
 import { auth } from "@clerk/nextjs/server";
@@ -12,13 +12,24 @@ export default async function MonthExpenses() {
   const { userId } = await auth();
 
   if (!userId) {
+    const previewExpenses = getLandingPreviewMonthExpenses();
     return (
       <section className="py-20 bg-muted/20">
-        <div className="wrapper">
-          <LandingAuthPromo
-            headline="Plan the month ahead with totals you can trust"
-            subheadline="Roll up rent, subscriptions, and fun spending into one dashboard so you can set goals and stay on track—month after month."
+        <div className="wrapper space-y-12">
+          <SectionHeader
+            title="Your Month Spending"
+            icon={Calendar}
+            description="Demo preview — sample expenses from the last 30 days (not saved)."
           />
+          <div className="grid-wrapper">
+            {previewExpenses.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                category={expense.category ?? undefined}
+              />
+            ))}
+          </div>
         </div>
       </section>
     );

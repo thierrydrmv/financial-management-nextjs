@@ -31,7 +31,7 @@ export function DashboardMainFullSkeleton() {
 export function DashboardPageSkeleton() {
   return (
     <div className="w-full text-foreground motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-300">
-      <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[220px_1fr]">
+      <div className="grid w-full gap-4 lg:grid-cols-[220px_1fr]">
         <aside className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <div className="mb-8 flex items-center gap-3">
             <Skeleton className="size-8 rounded-full" />

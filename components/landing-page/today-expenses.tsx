@@ -1,8 +1,8 @@
-import { LandingAuthPromo } from "@/components/landing-page/landing-auth-promo";
 import { CalendarIcon, Clock } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import EmptyState from "../common/empty-state";
 import ExpenseCard from "../expenses/expense-card";
+import { getLandingPreviewTodayExpenses } from "@/lib/demo/preview-data";
 import { getTodayExpensesByUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 
@@ -10,13 +10,24 @@ export default async function TodayExpenses() {
   const { userId } = await auth();
 
   if (!userId) {
+    const previewExpenses = getLandingPreviewTodayExpenses();
     return (
       <section className="py-20 bg-muted/20">
-        <div className="wrapper">
-          <LandingAuthPromo
-            headline="Know what you spend today—before the day ends"
-            subheadline="Wealth Track helps you capture income and expenses as they happen, so you always see the full picture of your daily money flow."
+        <div className="wrapper space-y-12">
+          <SectionHeader
+            title="Your Daily Spending"
+            icon={Clock}
+            description="Demo preview — sample expenses from the last 24 hours (not saved)."
           />
+          <div className="grid-wrapper">
+            {previewExpenses.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                category={expense.category ?? undefined}
+              />
+            ))}
+          </div>
         </div>
       </section>
     );

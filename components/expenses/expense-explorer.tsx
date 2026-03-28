@@ -14,6 +14,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../ui/pagination";
+import { cn } from "@/lib/utils";
 import { ExpenseWithCategory } from "@/types";
 import {
   useCallback,
@@ -108,6 +109,7 @@ export default function ExpenseExplorer({
   pageSize,
   filterCategories,
   filters,
+  isPreview = false,
 }: {
   expensesWithCategory: ExpenseWithCategory[];
   totalCount: number;
@@ -115,6 +117,8 @@ export default function ExpenseExplorer({
   pageSize: number;
   filterCategories: FilterCategory[];
   filters: ExpenseListFilters;
+  /** Demo data: filters/search don’t update the URL; cards still link to detail preview. */
+  isPreview?: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -128,6 +132,7 @@ export default function ExpenseExplorer({
         }
       >,
     ) => {
+      if (isPreview) return;
       const next = {
         page: currentPage,
         search: filters.search,
@@ -139,7 +144,7 @@ export default function ExpenseExplorer({
         router.replace(buildExpenseListUrl(pathname, next), { scroll: false });
       });
     },
-    [currentPage, filters, pathname, router],
+    [currentPage, filters, isPreview, pathname, router],
   );
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -169,16 +174,31 @@ export default function ExpenseExplorer({
     [filterCategories, filters.categoryName, navigate],
   );
 
+  const previewControlsClass = isPreview
+    ? "pointer-events-none select-none opacity-90"
+    : "";
+
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row gap-4 mb-8">
+    <div data-preview={isPreview ? "true" : undefined}>
+      {isPreview ? (
+        <p className="mb-6 text-center text-xs font-medium text-muted-foreground">
+          Sample data — click a card to view details. Sign in to use search,
+          filters, and your real expenses.
+        </p>
+      ) : null}
+      <div
+        className={cn(
+          "mb-8 flex flex-col gap-4 sm:flex-row",
+          previewControlsClass,
+        )}
+      >
         <ExpenseSearchField
           key={filters.search}
           searchFromUrl={filters.search}
           onCommit={(search) => navigate({ search, page: 1 })}
         />
       </div>
-      <div className="mb-4 flex gap-2 flex-wrap">
+      <div className={cn("mb-4 flex flex-wrap gap-2", previewControlsClass)}>
         <Button
           onClick={() => {
             navigate({ type: "all", page: 1 });
@@ -204,7 +224,7 @@ export default function ExpenseExplorer({
           Income
         </Button>
       </div>
-      <div className="mb-8 flex gap-2 flex-wrap">
+      <div className={cn("mb-8 flex flex-wrap gap-2", previewControlsClass)}>
         <Button
           onClick={() => {
             navigate({ categoryName: null, page: 1 });
@@ -244,7 +264,11 @@ export default function ExpenseExplorer({
       )}
       {totalPages > 1 ? (
         <Pagination
-          className={`mt-10 transition-opacity ${isListPending ? "opacity-50 pointer-events-none" : ""}`}
+          className={cn(
+            "mt-10 transition-opacity",
+            isListPending && "pointer-events-none opacity-50",
+            isPreview && "pointer-events-none opacity-90",
+          )}
         >
           <PaginationContent className="flex-wrap justify-center gap-1">
             <PaginationItem>

@@ -263,7 +263,7 @@ export default function FinanceDashboardClient() {
 
   return (
     <div className="w-full text-foreground">
-      <div className="mx-auto grid w-full max-w-7xl gap-4 lg:grid-cols-[220px_1fr]">
+      <div className="grid w-full gap-4 lg:grid-cols-[220px_1fr]">
         <DashboardSidebar
           yearOptions={yearOptions}
           selectedYear={selYear}

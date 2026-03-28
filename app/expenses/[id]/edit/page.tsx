@@ -1,5 +1,8 @@
 import SectionHeader from "@/components/common/section-header";
+import { PreviewModeBanner } from "@/components/demo/preview-mode-banner";
 import ExpenseEditForm from "@/components/expenses/expense-edit-form";
+import { ExpenseEditPreviewPlaceholder } from "@/components/expenses/expense-edit-preview-placeholder";
+import { getPreviewExpenseById } from "@/lib/demo/preview-data";
 import { getAllCategories } from "@/lib/categories/category-select";
 import { getExpenseByIdAndUser } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
@@ -10,15 +13,25 @@ import { Suspense } from "react";
 async function EditExpenseContent({ id }: { id: string }) {
   const { userId } = await auth();
 
-  if (!userId) {
-    redirect("/");
-  }
   if (!id || Number.isNaN(Number(id))) notFound();
+  const numId = Number(id);
+
+  if (!userId) {
+    const preview = getPreviewExpenseById(numId);
+    if (!preview) redirect("/");
+    return (
+      <div className="w-full space-y-8">
+        <PreviewModeBanner />
+        <ExpenseEditPreviewPlaceholder expense={preview} />
+      </div>
+    );
+  }
+
   const userIdSafe = userId as string;
 
   const [categories, expense] = await Promise.all([
     getAllCategories(userIdSafe),
-    getExpenseByIdAndUser(Number(id), userIdSafe),
+    getExpenseByIdAndUser(numId, userIdSafe),
   ]);
 
   if (!expense) notFound();
@@ -42,7 +55,7 @@ export default async function EditPage(props: {
           />
         </div>
 
-        <div className="max-w-2xl w-full">
+        <div className="w-full max-w-2xl">
           <Suspense fallback={<div>Loading expense...</div>}>
             <EditExpenseContent id={id} />
           </Suspense>

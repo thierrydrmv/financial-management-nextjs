@@ -1,6 +1,12 @@
 import SectionHeader from "@/components/common/section-header";
+import { PreviewModeBanner } from "@/components/demo/preview-mode-banner";
 import ExpenseExplorer from "@/components/expenses/expense-explorer";
 import { EXPENSE_LIST_PAGE_SIZE } from "@/lib/expenses/expense-list-constants";
+import {
+  getPreviewExpensesPageSlice,
+  PREVIEW_EXPENSE_FILTERS,
+  PREVIEW_FILTER_CATEGORIES,
+} from "@/lib/demo/preview-data";
 import {
   countExpensesWithCategoryForUser,
   getCategoriesForUserExpenseFilters,
@@ -9,7 +15,6 @@ import {
 } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import { CompassIcon } from "lucide-react";
-import { redirect } from "next/navigation";
 
 function parseExpenseListSearchParams(
   raw: Record<string, string | string[] | undefined>,
@@ -46,8 +51,32 @@ export default async function ExplorePage({
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/");
+    const { expenses, totalCount } = getPreviewExpensesPageSlice();
+    return (
+      <div className="py-20">
+        <div className="wrapper">
+          <PreviewModeBanner />
+          <div className="mb-12">
+            <SectionHeader
+              title="All Expenses"
+              icon={CompassIcon}
+              description="Browse and manage all your recorded expenses"
+            />
+          </div>
+          <ExpenseExplorer
+            isPreview
+            expensesWithCategory={expenses}
+            totalCount={totalCount}
+            page={1}
+            pageSize={EXPENSE_LIST_PAGE_SIZE}
+            filterCategories={PREVIEW_FILTER_CATEGORIES}
+            filters={PREVIEW_EXPENSE_FILTERS}
+          />
+        </div>
+      </div>
+    );
   }
+
   const userIdSafe = userId as string;
   const raw = await searchParams;
   const { page: pageFromUrl, filters } = parseExpenseListSearchParams(raw);

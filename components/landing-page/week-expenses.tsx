@@ -1,9 +1,9 @@
-import { LandingAuthPromo } from "@/components/landing-page/landing-auth-promo";
 import { ArrowUpRightIcon, CalendarIcon, DollarSign } from "lucide-react";
 import SectionHeader from "../common/section-header";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import EmptyState from "../common/empty-state";
+import { getLandingPreviewWeekExpenses } from "@/lib/demo/preview-data";
 import { getLastWeekExpensesByUser } from "@/lib/expenses/expense-select";
 import ExpenseCard from "../expenses/expense-card";
 import { auth } from "@clerk/nextjs/server";
@@ -12,13 +12,24 @@ export default async function WeekExpenses() {
   const { userId } = await auth();
 
   if (!userId) {
+    const previewExpenses = getLandingPreviewWeekExpenses();
     return (
       <section className="py-20">
-        <div className="wrapper">
-          <LandingAuthPromo
-            headline="Turn a week of receipts into a clear spending story"
-            subheadline="See patterns across the last seven days, compare categories, and adjust habits—without spreadsheets or guesswork."
+        <div className="wrapper space-y-12">
+          <SectionHeader
+            title="Your Weekly Spending"
+            icon={DollarSign}
+            description="Demo preview — sample expenses from the last 7 days (not saved)."
           />
+          <div className="grid-wrapper">
+            {previewExpenses.map((expense) => (
+              <ExpenseCard
+                key={expense.id}
+                expense={expense}
+                category={expense.category ?? undefined}
+              />
+            ))}
+          </div>
         </div>
       </section>
     );

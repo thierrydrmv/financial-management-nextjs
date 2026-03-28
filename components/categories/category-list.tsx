@@ -4,8 +4,11 @@ import { CategoryDeleteForm } from "./category-delete-form";
 import { CategoryWithExpenseCount } from "@/lib/categories/category-select";
 export default function CategoryList({
   categories,
+  previewMode = false,
 }: {
   categories: CategoryWithExpenseCount[];
+  /** Demo list: no delete actions. */
+  previewMode?: boolean;
 }) {
   if (categories.length === 0) {
     return (
@@ -16,7 +19,14 @@ export default function CategoryList({
   }
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold tracking-tight">Your categories</h2>
+      <h2 className="text-lg font-semibold tracking-tight">
+        {previewMode ? "Sample categories" : "Your categories"}
+      </h2>
+      {previewMode ? (
+        <p className="text-xs text-muted-foreground">
+          Illustrative labels only — sign in to create your own.
+        </p>
+      ) : null}
       <ul className="grid gap-3 sm:grid-cols-2">
         {categories.map((cat) => (
           <li key={cat.id}>
@@ -41,15 +51,17 @@ export default function CategoryList({
                     ) : null}
                   </div>
                 </div>
-                <CategoryDeleteForm
-                  id={String(cat.id)}
-                  disabled={cat.expenseCount > 0}
-                  title={
-                    cat.expenseCount > 0
-                      ? "Cannot delete a category that is still used by expenses."
-                      : undefined
-                  }
-                />
+                {previewMode ? null : (
+                  <CategoryDeleteForm
+                    id={String(cat.id)}
+                    disabled={cat.expenseCount > 0}
+                    title={
+                      cat.expenseCount > 0
+                        ? "Cannot delete a category that is still used by expenses."
+                        : undefined
+                    }
+                  />
+                )}
               </CardContent>
             </Card>
           </li>

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Show,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-  useAuth,
-} from "@clerk/nextjs";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import {
   AlignEndHorizontal,
   BanknoteArrowUp,
@@ -17,17 +11,11 @@ import {
   PiggyBank,
 } from "lucide-react";
 import Link from "next/link";
+import { clerkSignInTriggerClass } from "@/components/common/clerk-cta-classes";
 import { Button } from "../ui/button";
 import { Suspense } from "react";
-import { cn } from "@/lib/utils";
 
-const navItemClass = (interactive: boolean) =>
-  cn(
-    "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-    interactive
-      ? "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-      : "cursor-not-allowed text-muted-foreground/55 opacity-60 pointer-events-none select-none",
-  );
+const navLinkClass = clerkSignInTriggerClass;
 
 const Logo = () => {
   return (
@@ -43,60 +31,24 @@ const Logo = () => {
 };
 
 function HeaderNav() {
-  const { isSignedIn, isLoaded } = useAuth();
-  const appUnlocked = Boolean(isLoaded && isSignedIn);
-
   return (
     <nav className="flex items-center gap-1" aria-label="Main">
-      <Link href="/" className={navItemClass(true)}>
+      <Link href="/" className={navLinkClass}>
         <HomeIcon className="size-4" />
         <span>Home</span>
       </Link>
-      {appUnlocked ? (
-        <Link href="/expenses" className={navItemClass(true)}>
-          <DollarSign className="size-4" />
-          <span>Expenses</span>
-        </Link>
-      ) : (
-        <span
-          className={navItemClass(false)}
-          aria-disabled="true"
-          title="Sign in to open Expenses"
-        >
-          <DollarSign className="size-4" aria-hidden />
-          <span>Expenses</span>
-        </span>
-      )}
-      {appUnlocked ? (
-        <Link href="/dashboard" className={navItemClass(true)}>
-          <AlignEndHorizontal className="size-4" />
-          <span>Dashboard</span>
-        </Link>
-      ) : (
-        <span
-          className={navItemClass(false)}
-          aria-disabled="true"
-          title="Sign in to open Dashboard"
-        >
-          <AlignEndHorizontal className="size-4" aria-hidden />
-          <span>Dashboard</span>
-        </span>
-      )}
-      {appUnlocked ? (
-        <Link href="/categories" className={navItemClass(true)}>
-          <Group className="size-4" />
-          <span>Categories</span>
-        </Link>
-      ) : (
-        <span
-          className={navItemClass(false)}
-          aria-disabled="true"
-          title="Sign in to open Categories"
-        >
-          <Group className="size-4" aria-hidden />
-          <span>Categories</span>
-        </span>
-      )}
+      <Link href="/expenses" className={navLinkClass}>
+        <DollarSign className="size-4" />
+        <span>Expenses</span>
+      </Link>
+      <Link href="/dashboard" className={navLinkClass}>
+        <AlignEndHorizontal className="size-4" />
+        <span>Dashboard</span>
+      </Link>
+      <Link href="/categories" className={navLinkClass}>
+        <Group className="size-4" />
+        <span>Categories</span>
+      </Link>
     </nav>
   );
 }
@@ -126,7 +78,7 @@ export default function Header() {
             >
               <Show when="signed-out">
                 <SignInButton mode="modal">
-                  <button type="button" className={navItemClass(true)}>
+                  <button type="button" className={navLinkClass}>
                     Sign in
                   </button>
                 </SignInButton>
