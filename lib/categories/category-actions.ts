@@ -14,20 +14,12 @@ export const addCategoryAction = async (
   formData: FormData,
 ) => {
   try {
-    const { userId, orgId } = await auth();
+    const { userId } = await auth();
 
     if (!userId)
       return {
         success: false,
         message: "You must be signed in to submit a category.",
-        errors: undefined,
-      };
-
-    if (!orgId)
-      return {
-        success: false,
-        message:
-          "You must be a member of an organization to submit a category.",
         errors: undefined,
       };
 
@@ -49,17 +41,14 @@ export const addCategoryAction = async (
       .select({ id: categories.id })
       .from(categories)
       .where(
-        and(
-          eq(categories.organizationId, orgId),
-          eq(categories.name, name.trim()),
-        ),
+        and(eq(categories.userId, userId), eq(categories.name, name.trim())),
       )
       .limit(1);
 
     if (existing.length > 0) {
       return {
         success: false,
-        message: "This organization already has a category with this name.",
+        message: "You already have a category with this name.",
         errors: { name: ["A category with this name already exists."] },
       };
     }
@@ -69,7 +58,6 @@ export const addCategoryAction = async (
     await db.insert(categories).values({
       name,
       userId,
-      organizationId: orgId,
     });
 
     revalidatePath("/submit");
@@ -102,18 +90,11 @@ export const deleteCategoryAction = async (
   _prevState: FormState,
   formData: FormData,
 ): Promise<FormState> => {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
   if (!userId) {
     return {
       success: false,
       message: "You must be signed in to delete a category.",
-      errors: undefined,
-    };
-  }
-  if (!orgId) {
-    return {
-      success: false,
-      message: "You must be a member of an organization to delete a category.",
       errors: undefined,
     };
   }

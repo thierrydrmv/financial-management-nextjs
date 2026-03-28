@@ -18,7 +18,6 @@ const expenseWithCategorySelect = {
   createdAt: expenses.createdAt,
   submittedBy: expenses.submittedBy,
   userId: expenses.userId,
-  organizationId: expenses.organizationId,
   category: {
     id: categories.id,
     name: categories.name,

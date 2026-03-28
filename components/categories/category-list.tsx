@@ -4,11 +4,8 @@ import { CategoryDeleteForm } from "./category-delete-form";
 import { CategoryWithExpenseCount } from "@/lib/categories/category-select";
 export default function CategoryList({
   categories,
-  hasOrganization,
 }: {
   categories: CategoryWithExpenseCount[];
-  /** When false, delete is disabled (categories require an org context to manage). */
-  hasOrganization: boolean;
 }) {
   if (categories.length === 0) {
     return (
@@ -46,15 +43,11 @@ export default function CategoryList({
                 </div>
                 <CategoryDeleteForm
                   id={String(cat.id)}
-                  disabled={
-                    !hasOrganization || cat.expenseCount > 0
-                  }
+                  disabled={cat.expenseCount > 0}
                   title={
-                    !hasOrganization
-                      ? "Select or join an organization to delete categories."
-                      : cat.expenseCount > 0
-                        ? "Cannot delete a category that is still used by expenses."
-                        : undefined
+                    cat.expenseCount > 0
+                      ? "Cannot delete a category that is still used by expenses."
+                      : undefined
                   }
                 />
               </CardContent>

@@ -5,13 +5,13 @@ import { BanknoteArrowUp } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function SubmitPage() {
-  const { userId, orgId, redirectToSignIn } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
     redirectToSignIn();
   }
   const userIdSafe = userId as string;
-  const categories = await getAllCategories(userIdSafe, orgId ?? null);
+  const categories = await getAllCategories(userIdSafe);
   return (
     <section className="py-20">
       <div className="wrapper flex flex-col items-center">

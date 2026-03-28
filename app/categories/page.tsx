@@ -6,16 +6,13 @@ import { SparkleIcon } from "lucide-react";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function Categories() {
-  const { userId, orgId, redirectToSignIn } = await auth();
+  const { userId, redirectToSignIn } = await auth();
 
   if (!userId) {
     redirectToSignIn();
   }
   const userIdSafe = userId as string;
-  const categories = await getAllCategoriesWithExpenseCount(
-    userIdSafe,
-    orgId ?? null,
-  );
+  const categories = await getAllCategoriesWithExpenseCount(userIdSafe);
 
   return (
     <section className="py-20">
@@ -30,10 +27,7 @@ export default async function Categories() {
         <div className="w-full max-w-2xl space-y-12">
           <CategorySubmitForm />
           <div className="border-t pt-10">
-            <CategoryList
-              categories={categories}
-              hasOrganization={Boolean(orgId)}
-            />
+            <CategoryList categories={categories} />
           </div>
         </div>
       </div>

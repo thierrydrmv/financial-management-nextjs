@@ -15,20 +15,12 @@ export const addExpenseAction = async (
   formData: FormData,
 ) => {
   try {
-    const { userId, orgId } = await auth();
+    const { userId } = await auth();
 
     if (!userId)
       return {
         success: false,
         message: "You must be signed in to submit an expense.",
-        errors: undefined,
-      };
-
-    if (!orgId)
-      return {
-        success: false,
-        message:
-          "You must be a member of an organization to submit an expense.",
         errors: undefined,
       };
 
@@ -43,7 +35,7 @@ export const addExpenseAction = async (
       const hasAnyCategories = await db
         .select({ id: categories.id })
         .from(categories)
-        .where(eq(categories.organizationId, orgId))
+        .where(eq(categories.userId, userId))
         .limit(1);
 
       if (hasAnyCategories.length === 0) {
@@ -90,7 +82,6 @@ export const addExpenseAction = async (
       paymentMethod,
       isRecurring,
       submittedBy: userEmail,
-      organizationId: orgId,
       userId,
     });
 
@@ -122,14 +113,9 @@ export const addExpenseAction = async (
 export const deleteExpenseAction = async (
   formData: FormData,
 ): Promise<void> => {
-  const { userId, orgId } = await auth();
+  const { userId } = await auth();
 
   if (!userId) throw new Error("You must be signed in to delete a expense.");
-
-  if (!orgId)
-    throw new Error(
-      "You must be a member of an organization to delete a expense.",
-    );
 
   const idValue = formData.get("id");
   const id = Number(idValue);
@@ -156,7 +142,7 @@ export async function updateExpenseAction(
   formData: FormData,
 ): Promise<FormState> {
   try {
-    const { userId, orgId } = await auth();
+    const { userId } = await auth();
     if (!userId)
       return {
         success: false,
@@ -164,13 +150,6 @@ export async function updateExpenseAction(
         errors: undefined,
       };
 
-    if (!orgId)
-      return {
-        success: false,
-        message:
-          "You must be a member of an organization to update an expense.",
-        errors: undefined,
-      };
     const rawData = {
       id: formData.get("id"),
       type: formData.get("type"),

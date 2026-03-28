@@ -14,7 +14,6 @@ export type SerializedExpenseWithCategory = {
   createdAt: string | null;
   submittedBy: string | null;
   userId: string | null;
-  organizationId: string | null;
   category?: {
     id: number;
     name: string;
@@ -46,7 +45,6 @@ export function serializeExpensesForClient(
           : null,
     submittedBy: exp.submittedBy,
     userId: exp.userId,
-    organizationId: exp.organizationId,
     category: exp.category
       ? {
           id: exp.category.id,
@@ -78,7 +76,6 @@ export function deserializeExpensesClient(
     createdAt: exp.createdAt ? new Date(exp.createdAt) : null,
     submittedBy: exp.submittedBy,
     userId: exp.userId,
-    organizationId: exp.organizationId,
     category: exp.category
       ? {
           id: exp.category.id,

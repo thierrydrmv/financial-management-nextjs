@@ -1,4 +1,4 @@
-import { Show, SignInButton, SignUpButton } from "@clerk/nextjs";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import {
   AlignEndHorizontal,
   BanknoteArrowUp,
@@ -11,7 +11,6 @@ import {
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Suspense } from "react";
-import CustomUserButton from "./custom-user-button";
 
 const Logo = () => {
   return (
@@ -83,7 +82,7 @@ export default function Header() {
                     Submit Expense
                   </Link>
                 </Button>
-                <CustomUserButton />
+                <UserButton />
               </Show>
             </Suspense>
           </div>

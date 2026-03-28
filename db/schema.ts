@@ -46,15 +46,11 @@ export const expenses = pgTable(
 
     // Ownership
     userId: varchar("user_id", { length: 255 }),
-    organizationId: varchar("organization_id", { length: 255 }),
   },
   (table) => ({
     categoryIdx: index("expenses_category_idx").on(table.categoryId),
     dateIdx: index("expenses_date_idx").on(table.expenseDate),
     userIdx: index("expenses_user_idx").on(table.userId),
-    organizationIdx: index("expenses_organization_idx").on(
-      table.organizationId,
-    ),
   }),
 );
 
@@ -66,14 +62,9 @@ export const categories = pgTable(
     name: varchar("name", { length: 80 }).notNull(),
     // e.g. Moradia | Alimentação | Transporte | Lazer | Saúde | Vestuário
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-    // Add these:
     userId: varchar("user_id", { length: 255 }),
-    organizationId: varchar("organization_id", { length: 255 }),
   },
   (table) => ({
     userIdx: index("categories_user_idx").on(table.userId),
-    organizationIdx: index("categories_organization_idx").on(
-      table.organizationId,
-    ),
   }),
 );

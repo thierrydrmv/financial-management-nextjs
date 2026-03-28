@@ -1,12 +1,11 @@
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/neon-http";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { categories, expenses } from "./schema";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
 const SEED_USER_ID = "user_3AXu35Efl2Nxyge4515o1SVQvng";
-const SEED_ORG_ID = "org_3AcAzBvwpZJ6zIzKuGvqjSviR9K";
 
 const seedCategories = [
   { name: "Food" },
@@ -253,22 +252,8 @@ function seedExpenses(categoryIds: CategoryRow[]): ExpenseSeed[] {
 async function main() {
   console.log("🌱 Seeding database...");
 
-  await db
-    .delete(expenses)
-    .where(
-      and(
-        eq(expenses.userId, SEED_USER_ID),
-        eq(expenses.organizationId, SEED_ORG_ID),
-      ),
-    );
-  await db
-    .delete(categories)
-    .where(
-      and(
-        eq(categories.userId, SEED_USER_ID),
-        eq(categories.organizationId, SEED_ORG_ID),
-      ),
-    );
+  await db.delete(expenses).where(eq(expenses.userId, SEED_USER_ID));
+  await db.delete(categories).where(eq(categories.userId, SEED_USER_ID));
   console.log("✅ Cleared existing data");
 
   const insertedCategories = await db
@@ -277,7 +262,6 @@ async function main() {
       seedCategories.map((c) => ({
         name: c.name,
         userId: SEED_USER_ID,
-        organizationId: SEED_ORG_ID,
       })),
     )
     .returning({ id: categories.id, name: categories.name });
@@ -290,7 +274,6 @@ async function main() {
       ...e,
       submittedBy: "varelathierry@gmail.com",
       userId: SEED_USER_ID,
-      organizationId: SEED_ORG_ID,
     })),
   );
 
