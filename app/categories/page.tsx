@@ -3,7 +3,7 @@ import { CategoryFormPreviewPlaceholder } from "@/components/categories/category
 import CategorySubmitForm from "@/components/categories/category-submit-form";
 import SectionHeader from "@/components/common/section-header";
 import { PreviewModeBanner } from "@/components/demo/preview-mode-banner";
-import { PREVIEW_CATEGORIES_WITH_COUNT } from "@/lib/demo/preview-data";
+import { getPreviewCategoriesWithCount } from "@/lib/demo/preview-data";
 import { getAllCategoriesWithExpenseCount } from "@/lib/categories/category-select";
 import { auth } from "@clerk/nextjs/server";
 import { SparkleIcon } from "lucide-react";
@@ -12,6 +12,7 @@ export default async function Categories() {
   const { userId } = await auth();
 
   if (!userId) {
+    const previewCategoriesWithCount = getPreviewCategoriesWithCount();
     return (
       <section className="py-20">
         <div className="wrapper flex flex-col items-center">
@@ -27,7 +28,7 @@ export default async function Categories() {
             <CategoryFormPreviewPlaceholder />
             <div className="border-t pt-10">
               <CategoryList
-                categories={PREVIEW_CATEGORIES_WITH_COUNT}
+                categories={previewCategoriesWithCount}
                 previewMode
               />
             </div>
