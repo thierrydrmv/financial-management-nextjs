@@ -490,11 +490,24 @@ function addDays(base: Date, deltaDays: number): Date {
   return d;
 }
 
-function withExpenseDate(
-  e: ExpenseWithCategory,
-  expenseDate: Date,
-): ExpenseWithCategory {
-  return { ...e, expenseDate };
+function startOfLocalDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+
+function endOfLocalDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(23, 59, 59, 999);
+  return x;
+}
+
+function isSameLocalCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
 }
 
 function expensePoolSortedByDateDesc(): ExpenseWithCategory[] {
@@ -505,32 +518,52 @@ function expensePoolSortedByDateDesc(): ExpenseWithCategory[] {
 }
 
 /**
- * Signed-out home: demo cards for “recent” spending. Dates are anchored to **today**
- * so the list is never empty (static mock years alone would miss rolling windows).
+ * Signed-out home: uses each row’s real `expenseDate` (same as `/expenses/[id]`).
+ * “Today” = same **local calendar day** as `new Date()` when this runs (SSR).
+ * Returns an empty array when the demo has no expense on that day (same idea as signed-in).
  */
 export function getLandingPreviewTodayExpenses(): ExpenseWithCategory[] {
   const pool = expensePoolSortedByDateDesc();
-  const picks = [pool[0], pool[1], pool[2]].filter(Boolean);
-  const base = new Date();
-  return picks.map((e, i) => withExpenseDate(e, addDays(base, -i)));
+  const today = new Date();
+  const sameDay = pool.filter((e) =>
+    isSameLocalCalendarDay(new Date(e.expenseDate), today),
+  );
+  if (sameDay.length === 0) {
+    return [];
+  }
+  return sameDay.slice(0, 3);
 }
 
-/** Last 7 days — 5 sample rows. */
+/** Demo week window: last 7 local calendar days including today. Empty if none. */
 export function getLandingPreviewWeekExpenses(): ExpenseWithCategory[] {
   const pool = expensePoolSortedByDateDesc();
-  const daysAgo = [0, 1, 2, 3, 5];
-  const picks = [pool[0], pool[1], pool[2], pool[3], pool[4]].filter(Boolean);
-  const base = new Date();
-  return picks.map((e, i) => withExpenseDate(e, addDays(base, -daysAgo[i]!)));
+  const now = new Date();
+  const windowStart = startOfLocalDay(addDays(now, -6));
+  const windowEnd = endOfLocalDay(now);
+  const inWeek = pool.filter((e) => {
+    const t = new Date(e.expenseDate).getTime();
+    return t >= windowStart.getTime() && t <= windowEnd.getTime();
+  });
+  if (inWeek.length === 0) {
+    return [];
+  }
+  return inWeek.slice(0, 5);
 }
 
-/** Last ~30 days — 8 sample rows. */
+/** Demo month window: last 30 local calendar days including today. Empty if none. */
 export function getLandingPreviewMonthExpenses(): ExpenseWithCategory[] {
   const pool = expensePoolSortedByDateDesc();
-  const daysAgo = [0, 3, 6, 9, 12, 16, 22, 28];
-  const picks = pool.slice(0, 8);
-  const base = new Date();
-  return picks.map((e, i) => withExpenseDate(e, addDays(base, -daysAgo[i]!)));
+  const now = new Date();
+  const windowStart = startOfLocalDay(addDays(now, -29));
+  const windowEnd = endOfLocalDay(now);
+  const inMonth = pool.filter((e) => {
+    const t = new Date(e.expenseDate).getTime();
+    return t >= windowStart.getTime() && t <= windowEnd.getTime();
+  });
+  if (inMonth.length === 0) {
+    return [];
+  }
+  return inMonth.slice(0, 8);
 }
 
 /** Signed-out expense detail/edit: resolve a row from `buildMockExpenses()` by id. */

@@ -21,15 +21,22 @@ export default async function WeekExpenses() {
             icon={DollarSign}
             description="Demo preview — sample expenses from the last 7 days (not saved)."
           />
-          <div className="grid-wrapper">
-            {previewExpenses.map((expense) => (
-              <ExpenseCard
-                key={expense.id}
-                expense={expense}
-                category={expense.category ?? undefined}
-              />
-            ))}
-          </div>
+          {previewExpenses.length > 0 ? (
+            <div className="grid-wrapper">
+              {previewExpenses.map((expense) => (
+                <ExpenseCard
+                  key={expense.id}
+                  expense={expense}
+                  category={expense.category ?? undefined}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              message="No expenses launched this week. Check back soon for new expenses."
+              icon={CalendarIcon}
+            />
+          )}
         </div>
       </section>
     );
