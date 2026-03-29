@@ -96,8 +96,8 @@ function MobileNavPanel({
       aria-modal="true"
       aria-labelledby={`${titleId}-heading`}
       className={cn(
-        "fixed inset-0 z-[200] flex min-h-0 flex-col bg-background md:hidden",
-        "h-[100dvh] max-h-[100dvh] w-full",
+        "fixed inset-0 z-200 flex min-h-0 flex-col bg-background md:hidden",
+        "h-dvh max-h-dvh w-full",
         "pt-[env(safe-area-inset-top)]",
         "motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-200",
       )}
