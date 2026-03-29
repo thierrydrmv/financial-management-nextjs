@@ -480,8 +480,12 @@ export function getLandingHeroPreviewStats(): LandingHeroPreviewStats {
   };
 }
 
-function expenseOnlyMock(): ExpenseWithCategory[] {
-  return buildMockExpenses().filter((e) => e.type === "expense");
+/** All demo rows (income + expense), same mix idea as signed-in home queries. */
+function mockTransactionsSortedByDateDesc(): ExpenseWithCategory[] {
+  return buildMockExpenses().sort(
+    (a, b) =>
+      new Date(b.expenseDate).getTime() - new Date(a.expenseDate).getTime(),
+  );
 }
 
 function addDays(base: Date, deltaDays: number): Date {
@@ -510,20 +514,13 @@ function isSameLocalCalendarDay(a: Date, b: Date): boolean {
   );
 }
 
-function expensePoolSortedByDateDesc(): ExpenseWithCategory[] {
-  return expenseOnlyMock().sort(
-    (a, b) =>
-      new Date(b.expenseDate).getTime() - new Date(a.expenseDate).getTime(),
-  );
-}
-
 /**
  * Signed-out home: uses each row’s real `expenseDate` (same as `/expenses/[id]`).
  * “Today” = same **local calendar day** as `new Date()` when this runs (SSR).
  * Returns an empty array when the demo has no expense on that day (same idea as signed-in).
  */
 export function getLandingPreviewTodayExpenses(): ExpenseWithCategory[] {
-  const pool = expensePoolSortedByDateDesc();
+  const pool = mockTransactionsSortedByDateDesc();
   const today = new Date();
   const sameDay = pool.filter((e) =>
     isSameLocalCalendarDay(new Date(e.expenseDate), today),
@@ -536,7 +533,7 @@ export function getLandingPreviewTodayExpenses(): ExpenseWithCategory[] {
 
 /** Demo week window: last 7 local calendar days including today. Empty if none. */
 export function getLandingPreviewWeekExpenses(): ExpenseWithCategory[] {
-  const pool = expensePoolSortedByDateDesc();
+  const pool = mockTransactionsSortedByDateDesc();
   const now = new Date();
   const windowStart = startOfLocalDay(addDays(now, -6));
   const windowEnd = endOfLocalDay(now);
@@ -552,7 +549,7 @@ export function getLandingPreviewWeekExpenses(): ExpenseWithCategory[] {
 
 /** Demo month window: last 30 local calendar days including today. Empty if none. */
 export function getLandingPreviewMonthExpenses(): ExpenseWithCategory[] {
-  const pool = expensePoolSortedByDateDesc();
+  const pool = mockTransactionsSortedByDateDesc();
   const now = new Date();
   const windowStart = startOfLocalDay(addDays(now, -29));
   const windowEnd = endOfLocalDay(now);
