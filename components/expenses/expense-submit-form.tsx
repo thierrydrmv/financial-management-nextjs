@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import {
   Suspense,
   useActionState,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -49,12 +50,31 @@ export default function ExpenseSubmitForm({
   const [category, setCategory] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
   const [amount, setAmount] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  /** Bumps on successful submit so the form remounts and uncontrolled fields reset. */
+  const [formKey, setFormKey] = useState(0);
   const [state, formAction, isPending] = useActionState(
     addExpenseAction,
     initialState,
   );
 
   const alertRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!state.success) return;
+    queueMicrotask(() => {
+      setType("expense");
+      setDate(undefined);
+      setPaymentMethod("");
+      setCategory("");
+      setIsRecurring(false);
+      setAmount("");
+      setTitle("");
+      setDescription("");
+      setFormKey((k) => k + 1);
+    });
+  }, [state.success]);
 
   const { errors, message, success } = state;
 
@@ -109,7 +129,7 @@ export default function ExpenseSubmitForm({
   }));
 
   return (
-    <form className="space-y-6" action={formAction}>
+    <div className="space-y-6">
       {message && (
         <div
           ref={alertRef}
@@ -125,13 +145,15 @@ export default function ExpenseSubmitForm({
           {message}
         </div>
       )}
+      <form key={formKey} className="space-y-6" action={formAction}>
       <FormField
         label="Name"
         id="title"
         name="title"
         placeholder="My finance entry..."
         required
-        onChange={() => {}}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
         error={getFieldErrors("title")}
       />
       <FormField
@@ -158,6 +180,7 @@ export default function ExpenseSubmitForm({
         name="amount"
         placeholder="$20,00..."
         required
+        inputMode="decimal"
         value={amount}
         onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
         error={getFieldErrors("amount")}
@@ -233,7 +256,8 @@ export default function ExpenseSubmitForm({
         id="description"
         name="description"
         placeholder="Tell us more about your expense..."
-        onChange={() => {}}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
         error={getFieldErrors("description")}
         textarea
       />
@@ -247,6 +271,7 @@ export default function ExpenseSubmitForm({
           </>
         )}
       </Button>
-    </form>
+      </form>
+    </div>
   );
 }

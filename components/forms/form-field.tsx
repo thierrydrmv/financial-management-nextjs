@@ -36,8 +36,10 @@ interface FormFieldProps {
   options?: SelectOption[];
   defaultValue?: string;
   defaultChecked?: boolean;
-  /** When set, the text input is controlled (`value` + `onChange`). */
+  /** When set, text input / textarea is controlled (`value` + `onChange`). */
   value?: string;
+  /** Passed to `<input>` only (e.g. `decimal` for amount). */
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
 
   onChange?: (
     e:
@@ -75,6 +77,7 @@ export const FormField = ({
   defaultValue,
   defaultChecked,
   value,
+  inputMode,
 }: FormFieldProps) => {
   return (
     <div className="space-y-2" data-field={id}>
@@ -97,10 +100,17 @@ export const FormField = ({
               name={name}
               placeholder={placeholder}
               required={required}
-              defaultValue={defaultValue}
-              onChange={
-                onChange as React.ChangeEventHandler<HTMLTextAreaElement>
-              }
+              {...(value !== undefined
+                ? {
+                    value,
+                    onChange:
+                      onChange as React.ChangeEventHandler<HTMLTextAreaElement>,
+                  }
+                : {
+                    defaultValue,
+                    onChange:
+                      onChange as React.ChangeEventHandler<HTMLTextAreaElement>,
+                  })}
             />
           ) : calendar ? (
             <Calendar
@@ -128,8 +138,8 @@ export const FormField = ({
               name={name}
               placeholder={placeholder}
               required={required}
-              inputMode="decimal"
               autoComplete="off"
+              {...(inputMode !== undefined ? { inputMode } : {})}
               {...(value !== undefined
                 ? {
                     value,
