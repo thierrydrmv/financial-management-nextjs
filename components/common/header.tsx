@@ -174,10 +174,7 @@ function MobileNavPanel({
             </div>
           </Show>
           <Show when="signed-in">
-            <Button
-              asChild
-              className="h-auto w-full rounded-md bg-foreground py-3 text-sm font-semibold text-background hover:bg-foreground/90"
-            >
+            <Button asChild className="h-auto w-full gap-2 py-3">
               <Link href="/submit" onClick={onClose}>
                 <BanknoteArrowUp className="size-4" />
                 Submit expense

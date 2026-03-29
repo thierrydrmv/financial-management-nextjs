@@ -36,6 +36,8 @@ interface FormFieldProps {
   options?: SelectOption[];
   defaultValue?: string;
   defaultChecked?: boolean;
+  /** When set, the text input is controlled (`value` + `onChange`). */
+  value?: string;
 
   onChange?: (
     e:
@@ -72,9 +74,10 @@ export const FormField = ({
   onValueChange,
   defaultValue,
   defaultChecked,
+  value,
 }: FormFieldProps) => {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-field={id}>
       {checkbox ? (
         <div className="flex items-center gap-2">
           <Checkbox
@@ -125,8 +128,19 @@ export const FormField = ({
               name={name}
               placeholder={placeholder}
               required={required}
-              defaultValue={defaultValue}
-              onChange={onChange as React.ChangeEventHandler<HTMLInputElement>}
+              inputMode="decimal"
+              autoComplete="off"
+              {...(value !== undefined
+                ? {
+                    value,
+                    onChange:
+                      onChange as React.ChangeEventHandler<HTMLInputElement>,
+                  }
+                : {
+                    defaultValue,
+                    onChange:
+                      onChange as React.ChangeEventHandler<HTMLInputElement>,
+                  })}
             />
           )}
         </>

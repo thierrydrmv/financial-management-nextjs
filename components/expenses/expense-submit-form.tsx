@@ -3,16 +3,35 @@
 import { DollarSign, Loader2Icon } from "lucide-react";
 import { FormField } from "../forms/form-field";
 import { Button } from "../ui/button";
-import { Suspense, useActionState, useState } from "react";
+import {
+  Suspense,
+  useActionState,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { FormState } from "@/types";
 import { cn } from "@/lib/utils";
 import { addExpenseAction } from "@/lib/expenses/expense-actions";
+import { sanitizeAmountInput } from "@/lib/expenses/amount-input";
 
 const initialState: FormState = {
   success: false,
   errors: {},
   message: "",
 };
+
+/** DOM order for scrolling to the first field error (matches form layout). */
+const FIELD_SCROLL_ORDER = [
+  "title",
+  "type",
+  "amount",
+  "categoryId",
+  "expenseDate",
+  "paymentMethod",
+  "description",
+  "isRecurring",
+] as const;
 
 interface ExpenseSubmitFormProps {
   categories: {
@@ -29,12 +48,44 @@ export default function ExpenseSubmitForm({
   const [paymentMethod, setPaymentMethod] = useState("");
   const [category, setCategory] = useState("");
   const [isRecurring, setIsRecurring] = useState(false);
+  const [amount, setAmount] = useState("");
   const [state, formAction, isPending] = useActionState(
     addExpenseAction,
     initialState,
   );
 
+  const alertRef = useRef<HTMLDivElement | null>(null);
+
   const { errors, message, success } = state;
+
+  useLayoutEffect(() => {
+    if (!state.message?.trim()) return;
+
+    if (state.success) {
+      alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    const fieldErrors = state.errors as
+      | Record<string, string[] | undefined>
+      | undefined;
+    if (fieldErrors) {
+      for (const field of FIELD_SCROLL_ORDER) {
+        const list = fieldErrors[field];
+        if (Array.isArray(list) && list.length > 0) {
+          const el = document.querySelector<HTMLElement>(
+            `[data-field="${field}"]`,
+          );
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            return;
+          }
+        }
+      }
+    }
+
+    alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [state]);
   const getFieldErrors = (fieldName: string): string[] => {
     if (!errors) return [];
     return (errors as Record<string, string[]>)[fieldName] ?? [];
@@ -61,6 +112,7 @@ export default function ExpenseSubmitForm({
     <form className="space-y-6" action={formAction}>
       {message && (
         <div
+          ref={alertRef}
           className={cn(
             "p-4 rounded-lg border",
             success
@@ -106,7 +158,8 @@ export default function ExpenseSubmitForm({
         name="amount"
         placeholder="$20,00..."
         required
-        onChange={() => {}}
+        value={amount}
+        onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
         error={getFieldErrors("amount")}
       />
       {type === "expense" ? (

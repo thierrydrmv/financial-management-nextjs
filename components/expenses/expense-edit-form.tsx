@@ -7,6 +7,7 @@ import { Suspense, useActionState, useState } from "react";
 import { FormState } from "@/types";
 import { cn } from "@/lib/utils";
 import { updateExpenseAction } from "@/lib/expenses/expense-actions";
+import { sanitizeAmountInput } from "@/lib/expenses/amount-input";
 
 const initialState: FormState = {
   success: false,
@@ -47,6 +48,9 @@ export default function ExpenseEditForm({
     expense.categoryId?.toString() || "",
   );
   const [isRecurring, setIsRecurring] = useState(expense.isRecurring ?? false);
+  const [amount, setAmount] = useState(() =>
+    sanitizeAmountInput(String(expense.amount ?? "")),
+  );
 
   const [state, formAction, isPending] = useActionState(
     updateExpenseAction,
@@ -117,9 +121,9 @@ export default function ExpenseEditForm({
         label="Amount"
         id="amount"
         name="amount"
-        defaultValue={expense.amount}
+        value={amount}
+        onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
         required
-        onChange={() => {}}
         error={getFieldErrors("amount")}
       />
 
