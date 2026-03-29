@@ -121,14 +121,18 @@ function MobileNavPanel({
       <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overscroll-contain px-6 py-8 sm:px-8">
         <nav aria-label="Main">
           <ul className="flex flex-col items-center gap-8 sm:gap-10">
-            {NAV_ITEMS.map(({ href, label }) => (
+            {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
               <li key={href}>
                 <Link
                   href={href}
                   onClick={onClose}
-                  className="block text-center text-lg font-medium tracking-tight text-foreground transition-opacity hover:opacity-70 sm:text-xl"
+                  className={cn(
+                    navLinkClass,
+                    "justify-center gap-3 text-lg sm:text-xl",
+                  )}
                 >
-                  {label}
+                  <Icon className="size-5 shrink-0 sm:size-6" aria-hidden />
+                  <span>{label}</span>
                 </Link>
               </li>
             ))}
@@ -159,13 +163,13 @@ function MobileNavPanel({
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button
+                <Button
                   type="button"
-                  className="rounded-md bg-foreground px-6 py-2.5 text-sm font-semibold text-background transition-opacity hover:opacity-90 cursor-pointer"
+                  className="cursor-pointer"
                   onClick={onClose}
                 >
-                  Get started
-                </button>
+                  Sign Up
+                </Button>
               </SignUpButton>
             </div>
           </Show>
