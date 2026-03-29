@@ -252,6 +252,9 @@ export default function FinanceDashboardClient() {
   const showYearSkeleton = activeScope === "year";
 
   const navigate = (scope: "year" | "month", y: number, m: number) => {
+    if (y === selYear && m === selMonth1) {
+      return;
+    }
     setPendingNav((p) => ({
       scope,
       seq: (p?.seq ?? 0) + 1,
