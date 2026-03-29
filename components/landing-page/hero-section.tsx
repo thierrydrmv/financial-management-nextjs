@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import type { LandingHeroPreviewStats } from "@/lib/demo/preview-data";
 import {
   EyeIcon,
+  Receipt,
   Tags,
   UsersIcon,
   DollarSign,
@@ -30,8 +31,8 @@ const LiveBadge = () => {
 const defaultStatsData = [
   {
     icon: DollarSign,
-    value: "2.5K+",
-    label: "Transactions Tracked",
+    value: "$2.5M+",
+    label: "Spending Tracked",
   },
   {
     icon: UsersIcon,
@@ -40,9 +41,9 @@ const defaultStatsData = [
     hasBorder: true,
   },
   {
-    icon: EyeIcon,
-    value: "50K+",
-    label: "Expenses Logged",
+    icon: Receipt,
+    value: "500K+",
+    label: "Entries Logged",
     hasBorder: true,
   },
 ];
