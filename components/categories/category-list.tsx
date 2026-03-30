@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Group } from "lucide-react";
+import { TagIcon } from "lucide-react";
 import { CategoryDeleteForm } from "./category-delete-form";
 import { CategoryWithExpenseCount } from "@/lib/categories/category-select";
 export default function CategoryList({
@@ -33,7 +33,7 @@ export default function CategoryList({
             <Card className="py-0 shadow-none">
               <CardContent className="flex items-center gap-3 px-4 py-4">
                 <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <Group
+                  <TagIcon
                     className="size-4 shrink-0 text-muted-foreground"
                     aria-hidden
                   />
