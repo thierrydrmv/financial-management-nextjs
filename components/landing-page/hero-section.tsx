@@ -1,13 +1,7 @@
 import { PreviewModeBanner } from "@/components/demo/preview-mode-banner";
 import { Badge } from "@/components/ui/badge";
 import type { LandingHeroPreviewStats } from "@/lib/demo/preview-data";
-import {
-  EyeIcon,
-  Receipt,
-  Tags,
-  UsersIcon,
-  DollarSign,
-} from "lucide-react";
+import { Receipt, Tags, UsersIcon, DollarSign } from "lucide-react";
 import { HeroPrimaryCtas } from "./hero-primary-ctas";
 import StatsCard from "./stats-card";
 
@@ -62,7 +56,7 @@ function previewStatsData(s: LandingHeroPreviewStats) {
       hasBorder: true,
     },
     {
-      icon: EyeIcon,
+      icon: Receipt,
       value: s.expensesLogged,
       label: "Expense entries",
       hasBorder: true,
@@ -76,7 +70,9 @@ type HeroSectionProps = {
 };
 
 export default function HeroSection({ heroPreview = null }: HeroSectionProps) {
-  const statsData = heroPreview ? previewStatsData(heroPreview) : defaultStatsData;
+  const statsData = heroPreview
+    ? previewStatsData(heroPreview)
+    : defaultStatsData;
 
   return (
     <section className="relative overflow-hidden bg-linear-to-b from-background via-background to-muted/20">
