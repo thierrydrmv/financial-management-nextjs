@@ -9,7 +9,7 @@ import {
   LoaderIcon,
   Menu,
   PiggyBank,
-  TagIcon,
+  Tags,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +25,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/expenses", label: "Expenses", icon: DollarSign },
   { href: "/dashboard", label: "Dashboard", icon: AlignEndHorizontal },
-  { href: "/categories", label: "Categories", icon: TagIcon },
+  { href: "/categories", label: "Categories", icon: Tags },
 ] as const;
 
 function Logo({ onNavigate }: { onNavigate?: () => void }) {
