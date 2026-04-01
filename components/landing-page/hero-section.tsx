@@ -84,8 +84,8 @@ export default function HeroSection({ heroPreview = null }: HeroSectionProps) {
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground mb-10 max-w-2xl leading-relaxed">
             Track expenses, manage budgets, and gain clear insights into your
-            finances. WealthTrack helps you understand where your money goes and
-            make smarter financial decisions.
+            finances. WealthTracker helps you understand where your money goes
+            and make smarter financial decisions.
           </p>
           <HeroPrimaryCtas />
           <div className="grid w-full max-w-2xl grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-12">

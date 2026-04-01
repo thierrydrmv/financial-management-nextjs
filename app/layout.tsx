@@ -10,8 +10,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Wealth Track",
-  description: "Wealth Track is a platform for organizing your finances.",
+  title: "Wealth Tracker",
+  description: "Wealth Tracker is a platform for organizing your finances.",
 };
 
 export default function RootLayout({

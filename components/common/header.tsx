@@ -39,7 +39,7 @@ function Logo({ onNavigate }: { onNavigate?: () => void }) {
         <PiggyBank className="size-4 text-primary-foreground" />
       </div>
       <span className="truncate text-lg font-bold sm:text-xl">
-        <span className="text-primary">Wealth</span>Track
+        <span className="text-primary">Wealth</span>Tracker
       </span>
     </Link>
   );
