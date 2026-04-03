@@ -13,13 +13,10 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { clerkSignInTriggerClass } from "@/components/common/clerk-cta-classes";
 import { Button } from "../ui/button";
 import { Suspense, useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-
-const navLinkClass = clerkSignInTriggerClass;
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: HomeIcon },
@@ -49,7 +46,11 @@ function DesktopNav() {
   return (
     <nav className="hidden md:flex md:items-center md:gap-1" aria-label="Main">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
-        <Link key={href} href={href} className={navLinkClass}>
+        <Link
+          key={href}
+          href={href}
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        >
           <Icon className="size-4 shrink-0" />
           <span>{label}</span>
         </Link>
@@ -127,7 +128,7 @@ function MobileNavPanel({
                   href={href}
                   onClick={onClose}
                   className={cn(
-                    navLinkClass,
+                    "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50",
                     "justify-center gap-3 text-lg sm:text-xl",
                   )}
                 >
@@ -200,7 +201,10 @@ function HeaderAuthDesktop() {
       >
         <Show when="signed-out">
           <SignInButton mode="modal">
-            <button type="button" className={`${navLinkClass} cursor-pointer`}>
+            <button
+              type="button"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-muted/50 cursor-pointer"
+            >
               Sign in
             </button>
           </SignInButton>

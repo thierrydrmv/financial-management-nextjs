@@ -28,8 +28,8 @@ export default function CategoryList({
         </p>
       ) : null}
       <ul className="grid gap-3 sm:grid-cols-2">
-        {categories.map((cat) => (
-          <li key={cat.id}>
+        {categories.map((category) => (
+          <li key={category.id}>
             <Card className="py-0 shadow-none">
               <CardContent className="flex items-center gap-3 px-4 py-4">
                 <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -38,25 +38,28 @@ export default function CategoryList({
                     aria-hidden
                   />
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{cat.name}</p>
-                    {cat.createdAt ? (
+                    <p className="truncate font-medium">{category.name}</p>
+                    {category.createdAt ? (
                       <p className="text-xs text-muted-foreground">
                         Added{" "}
-                        {new Date(cat.createdAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
+                        {new Date(category.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
                       </p>
                     ) : null}
                   </div>
                 </div>
                 {previewMode ? null : (
                   <CategoryDeleteForm
-                    id={String(cat.id)}
-                    disabled={cat.expenseCount > 0}
+                    id={String(category.id)}
+                    disabled={category.expenseCount > 0}
                     title={
-                      cat.expenseCount > 0
+                      category.expenseCount > 0
                         ? "Cannot delete a category that is still used by expenses."
                         : undefined
                     }

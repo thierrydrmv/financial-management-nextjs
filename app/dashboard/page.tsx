@@ -11,7 +11,7 @@ export default async function DashboardPage() {
     <section className="py-20">
       <div className="wrapper">
         <div className="mx-auto w-full max-w-7xl">
-          {!userId ? <PreviewModeBanner className="mb-6" /> : null}
+          {!userId && <PreviewModeBanner className="mb-6" />}
           <Suspense fallback={<DashboardPageSkeleton />}>
             <FinanceDashboardClient />
           </Suspense>

@@ -40,18 +40,21 @@ export default async function Expense({
   if (!userId && !expense) {
     redirect("/");
   }
-  if (userId && !expense) {
-    notFound();
-  }
-
-  if (!expense) {
+  if ((userId && !expense) || !expense) {
     notFound();
   }
 
   const isPreview = !userId;
 
-  const { title, type, description, amount, paymentMethod, expenseDate, category } =
-    expense;
+  const {
+    title,
+    type,
+    description,
+    amount,
+    paymentMethod,
+    expenseDate,
+    category,
+  } = expense;
 
   return (
     <div className="py-16">
@@ -106,7 +109,7 @@ export default async function Expense({
                     value:
                       type === "income"
                         ? "N/A for income"
-                        : category?.name ?? "Not informed",
+                        : (category?.name ?? "Not informed"),
                     icon: TagIcon,
                   },
                   {

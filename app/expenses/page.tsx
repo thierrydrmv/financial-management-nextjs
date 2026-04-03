@@ -22,9 +22,9 @@ function parseExpenseListSearchParams(
   const pageParsed =
     Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
 
-  const q = typeof raw.q === "string" ? raw.q : "";
+  const searchQuery = typeof raw.q === "string" ? raw.q : "";
   const typeRaw = typeof raw.type === "string" ? raw.type : "all";
-  const type: ExpenseListFilters["type"] =
+  const expenseType: ExpenseListFilters["type"] =
     typeRaw === "expense" || typeRaw === "income" ? typeRaw : "all";
 
   const categoryName =
@@ -35,8 +35,8 @@ function parseExpenseListSearchParams(
   return {
     page: pageParsed,
     filters: {
-      type,
-      search: q,
+      type: expenseType,
+      search: searchQuery,
       categoryName,
     },
   };
