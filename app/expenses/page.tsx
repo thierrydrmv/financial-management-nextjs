@@ -6,41 +6,14 @@ import {
   getPreviewExpensesPaginated,
   PREVIEW_FILTER_CATEGORIES,
 } from "@/lib/demo/preview-data";
+import { parseExpenseListSearchParams } from "@/lib/expenses/expense-list-search-params";
 import {
   countExpensesWithCategoryForUser,
   getCategoriesForUserExpenseFilters,
   getExpensesWithCategoryByUserPaginated,
-  type ExpenseListFilters,
 } from "@/lib/expenses/expense-select";
 import { auth } from "@clerk/nextjs/server";
 import { CompassIcon } from "lucide-react";
-
-function parseExpenseListSearchParams(
-  raw: Record<string, string | string[] | undefined>,
-): { page: number; filters: ExpenseListFilters } {
-  const pageRaw = typeof raw.page === "string" ? parseInt(raw.page, 10) : 1;
-  const pageParsed =
-    Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
-
-  const searchQuery = typeof raw.q === "string" ? raw.q : "";
-  const typeRaw = typeof raw.type === "string" ? raw.type : "all";
-  const expenseType: ExpenseListFilters["type"] =
-    typeRaw === "expense" || typeRaw === "income" ? typeRaw : "all";
-
-  const categoryName =
-    typeof raw.category === "string" && raw.category.length > 0
-      ? raw.category
-      : null;
-
-  return {
-    page: pageParsed,
-    filters: {
-      type: expenseType,
-      search: searchQuery,
-      categoryName,
-    },
-  };
-}
 
 export default async function ExplorePage({
   searchParams,
