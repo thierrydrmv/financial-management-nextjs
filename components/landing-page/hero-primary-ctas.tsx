@@ -16,7 +16,7 @@ export function HeroPrimaryCtas() {
             className="px-8 text-base shadow-lg cursor-pointer"
           >
             <BanknoteArrowUp className="size-5" />
-            Add Expense
+            Add Transaction
           </Button>
         </SignInButton>
       </Show>
@@ -24,7 +24,7 @@ export function HeroPrimaryCtas() {
         <Button asChild size="lg" className="px-8 text-base shadow-lg">
           <Link href="/submit">
             <BanknoteArrowUp className="size-5" />
-            Add Expense
+            Add Transaction
           </Link>
         </Button>
       </Show>
