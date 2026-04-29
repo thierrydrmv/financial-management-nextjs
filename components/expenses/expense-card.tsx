@@ -39,9 +39,9 @@ export default function ExpenseCard({
       <Card className="group card-hover hover:bg-primary-foreground/10 border-solid border-gray-400 min-h-50">
         <CardHeader className="flex-1 space-y-0 pb-2">
           <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="min-w-0 flex-1 space-y-1.5 min-h-24">
               <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
+                <CardTitle className="text-lg leading-tight line-clamp-2 min-h-11 group-hover:text-primary transition-colors">
                   {expense.title}
                 </CardTitle>
                 {expense.isRecurring && (
@@ -57,11 +57,11 @@ export default function ExpenseCard({
                   <span>{dateLine}</span>
                 </p>
               )}
-              {expense.description ? (
-                <CardDescription className="line-clamp-2">
-                  {expense.description}
-                </CardDescription>
-              ) : null}
+              <CardDescription className="line-clamp-2 min-h-10">
+                {expense.description ?? (
+                  <span className="invisible">No description</span>
+                )}
+              </CardDescription>
             </div>
             <div className="shrink-0 text-right">
               <p className="text-xs font-medium text-muted-foreground">
