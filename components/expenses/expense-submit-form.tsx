@@ -146,131 +146,131 @@ export default function ExpenseSubmitForm({
         </div>
       )}
       <form key={formKey} className="space-y-6" action={formAction}>
-      <FormField
-        label="Name"
-        id="title"
-        name="title"
-        placeholder="My finance entry..."
-        required
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        error={getFieldErrors("title")}
-      />
-      <FormField
-        label="Type"
-        id="type"
-        name="type"
-        select
-        options={[
-          { label: "Expense", value: "expense" },
-          { label: "Income", value: "income" },
-        ]}
-        selectValue={type}
-        onValueChange={(value) => {
-          const nextType = value as "expense" | "income";
-          setType(nextType);
-          if (nextType === "income") setCategory("");
-        }}
-        error={getFieldErrors("type")}
-      />
-      <input type="hidden" name="type" value={type} />
-      <FormField
-        label="Amount"
-        id="amount"
-        name="amount"
-        placeholder="$20,00..."
-        required
-        inputMode="decimal"
-        value={amount}
-        onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
-        error={getFieldErrors("amount")}
-      />
-      {type === "expense" ? (
         <FormField
-          label="Category"
-          id="categoryId"
-          name="categoryId"
-          placeholder="Choose a category..."
+          label="Name"
+          id="title"
+          name="title"
+          placeholder="My finance entry..."
           required
-          select
-          options={categoryOptions}
-          selectValue={category}
-          onValueChange={setCategory}
-          error={categoryFieldErrors}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          error={getFieldErrors("title")}
         />
-      ) : null}
-      <input
-        type="hidden"
-        name="categoryId"
-        value={type === "expense" ? category : ""}
-      />
-      <Suspense fallback={<div>Loading calendar...</div>}>
         <FormField
-          label="Finance Date"
-          id="expenseDate"
-          name="expenseDate"
-          selectedDate={date}
-          onSelectDate={setDate}
-          error={getFieldErrors("expenseDate")}
-          calendar
+          label="Type"
+          id="type"
+          name="type"
+          select
+          options={[
+            { label: "Expense", value: "expense" },
+            { label: "Income", value: "income" },
+          ]}
+          selectValue={type}
+          onValueChange={(value) => {
+            const nextType = value as "expense" | "income";
+            setType(nextType);
+            if (nextType === "income") setCategory("");
+          }}
+          error={getFieldErrors("type")}
         />
-      </Suspense>
-      <input
-        type="hidden"
-        name="expenseDate"
-        value={date ? date.toISOString() : ""}
-      />
-      <FormField
-        label="Payment Method"
-        id="paymentMethod"
-        name="paymentMethod"
-        select
-        placeholder="Select payment method"
-        options={[
-          { label: "Credit Card", value: "credit-card" },
-          { label: "Debit Card", value: "debit-card" },
-          { label: "Cash", value: "cash" },
-          { label: "Pix", value: "pix" },
-        ]}
-        selectValue={paymentMethod}
-        onValueChange={setPaymentMethod}
-        error={getFieldErrors("paymentMethod")}
-      />
+        <input type="hidden" name="type" value={type} />
+        <FormField
+          label="Amount"
+          id="amount"
+          name="amount"
+          placeholder="$20,00..."
+          required
+          inputMode="decimal"
+          value={amount}
+          onChange={(e) => setAmount(sanitizeAmountInput(e.target.value))}
+          error={getFieldErrors("amount")}
+        />
+        {type === "expense" ? (
+          <FormField
+            label="Category"
+            id="categoryId"
+            name="categoryId"
+            placeholder="Choose a category..."
+            required
+            select
+            options={categoryOptions}
+            selectValue={category}
+            onValueChange={setCategory}
+            error={categoryFieldErrors}
+          />
+        ) : null}
+        <input
+          type="hidden"
+          name="categoryId"
+          value={type === "expense" ? category : ""}
+        />
+        <Suspense fallback={<div>Loading calendar...</div>}>
+          <FormField
+            label="Finance Date"
+            id="expenseDate"
+            name="expenseDate"
+            selectedDate={date}
+            onSelectDate={setDate}
+            error={getFieldErrors("expenseDate")}
+            calendar
+          />
+        </Suspense>
+        <input
+          type="hidden"
+          name="expenseDate"
+          value={date ? date.toISOString() : ""}
+        />
+        <FormField
+          label="Payment Method"
+          id="paymentMethod"
+          name="paymentMethod"
+          select
+          placeholder="Select payment method"
+          options={[
+            { label: "Credit Card", value: "credit-card" },
+            { label: "Debit Card", value: "debit-card" },
+            { label: "Cash", value: "cash" },
+            { label: "Pix", value: "pix" },
+          ]}
+          selectValue={paymentMethod}
+          onValueChange={setPaymentMethod}
+          error={getFieldErrors("paymentMethod")}
+        />
 
-      <input type="hidden" name="paymentMethod" value={paymentMethod} />
-      <FormField
-        label="Recurring"
-        id="isRecurring"
-        name="isRecurring"
-        checkbox
-        onCheckedChange={(checked) => setIsRecurring(checked === true)}
-        error={[]}
-      />
-      <input
-        type="hidden"
-        name="isRecurring"
-        value={isRecurring ? "true" : "false"}
-      />
-      <FormField
-        label="Description"
-        id="description"
-        name="description"
-        placeholder="Tell us more about your expense..."
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        error={getFieldErrors("description")}
-        textarea
-      />
-      <Button type="submit" size="lg" className="w-full">
-        {isPending ? (
-          <Loader2Icon className="size-4 animate-spin" />
-        ) : (
-          <>
-            <DollarSign className="size-4" />
-            Submit Expense
-          </>
-        )}
-      </Button>
+        <input type="hidden" name="paymentMethod" value={paymentMethod} />
+        <FormField
+          label="Recurring"
+          id="isRecurring"
+          name="isRecurring"
+          checkbox
+          onCheckedChange={(checked) => setIsRecurring(checked === true)}
+          error={[]}
+        />
+        <input
+          type="hidden"
+          name="isRecurring"
+          value={isRecurring ? "true" : "false"}
+        />
+        <FormField
+          label="Description"
+          id="description"
+          name="description"
+          placeholder="Tell us more about your expense..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          error={getFieldErrors("description")}
+          textarea
+        />
+        <Button type="submit" size="lg" className="w-full">
+          {isPending ? (
+            <Loader2Icon className="size-4 animate-spin" />
+          ) : (
+            <>
+              <DollarSign className="size-4" />
+              Submit Transaction
+            </>
+          )}
+        </Button>
       </form>
     </div>
   );

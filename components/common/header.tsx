@@ -178,7 +178,7 @@ function MobileNavPanel({
             <Button asChild className="h-auto w-full gap-2 py-3">
               <Link href="/submit" onClick={onClose}>
                 <BanknoteArrowUp className="size-4" />
-                Submit expense
+                Submit Transaction
               </Link>
             </Button>
           </Show>
@@ -216,7 +216,7 @@ function HeaderAuthDesktop() {
           <Button asChild>
             <Link href="/submit">
               <BanknoteArrowUp className="size-4" />
-              <span className="hidden lg:inline">Submit Expense</span>
+              <span className="hidden lg:inline">Submit Transaction</span>
               <span className="lg:hidden">Submit</span>
             </Link>
           </Button>

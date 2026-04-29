@@ -18,9 +18,9 @@ export default async function SubmitPage() {
       <div className="wrapper flex flex-col items-center">
         <div className="text-center">
           <SectionHeader
-            title="Submit an Expense"
+            title="Submit a Transaction"
             icon={BanknoteArrowUp}
-            description="Add a new expense to your records. It will help keep your financial overview up to date."
+            description="Add a new transaction to your records. It will help keep your financial overview up to date."
           />
         </div>
         <div className="max-w-2xl w-full">

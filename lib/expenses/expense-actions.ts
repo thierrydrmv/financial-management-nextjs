@@ -99,13 +99,13 @@ export const addExpenseAction = async (
       return {
         success: false,
         errors: error.flatten().fieldErrors,
-        message: "Failed to submit expense",
+        message: "Failed to submit transaction",
       };
     }
     return {
       success: false,
       errors: undefined,
-      message: "Failed to submit expense",
+      message: "Failed to submit transaction",
     };
   }
 };
