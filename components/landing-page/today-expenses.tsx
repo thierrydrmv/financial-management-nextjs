@@ -17,7 +17,7 @@ export default async function TodayExpenses() {
           <SectionHeader
             title="Your Daily Spending"
             icon={Clock}
-            description="Demo preview — sample expenses from the last 24 hours (not saved)."
+            description="Demo preview — sample financial transactions from the last 24 hours (not saved)."
           />
           {previewExpenses.length > 0 ? (
             <div className="grid-wrapper">
@@ -31,7 +31,7 @@ export default async function TodayExpenses() {
             </div>
           ) : (
             <EmptyState
-              message="No expenses launched today. Check back soon for new expenses."
+              message="No financial transactions launched today. Check back soon for new transactions."
               icon={CalendarIcon}
             />
           )}
@@ -62,7 +62,7 @@ export default async function TodayExpenses() {
           </div>
         ) : (
           <EmptyState
-            message="No expenses launched today. Check back soon for new expenses."
+            message="No financial transactions launched today. Check back soon for new transactions."
             icon={CalendarIcon}
           />
         )}

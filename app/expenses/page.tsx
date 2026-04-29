@@ -36,9 +36,9 @@ export default async function ExplorePage({
           <PreviewModeBanner />
           <div className="mb-12">
             <SectionHeader
-              title="All Incomes and Expenses"
+              title="All Financial Transactions"
               icon={CompassIcon}
-              description="Browse and manage all your recorded incomes and expenses"
+              description="Browse and manage all your recorded financial transactions"
             />
           </div>
           <ExpenseExplorer
@@ -76,9 +76,9 @@ export default async function ExplorePage({
       <div className="wrapper">
         <div className="mb-12">
           <SectionHeader
-            title="All Incomes and Expenses"
+            title="All Financial Transactions"
             icon={CompassIcon}
-            description="Browse and manage all your recorded incomes and expenses"
+            description="Browse and manage all your recorded financial transactions"
           />
           <ExpenseExplorer
             expensesWithCategory={expensesWithCategory}

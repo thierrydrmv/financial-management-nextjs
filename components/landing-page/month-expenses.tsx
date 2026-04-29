@@ -19,7 +19,7 @@ export default async function MonthExpenses() {
           <SectionHeader
             title="Your Month Spending"
             icon={Calendar}
-            description="Demo preview — sample expenses from the last 30 days (not saved)."
+            description="Demo preview — sample financial transactions from the last 30 days (not saved)."
           />
           {previewExpenses.length > 0 ? (
             <div className="grid-wrapper">
@@ -33,7 +33,7 @@ export default async function MonthExpenses() {
             </div>
           ) : (
             <EmptyState
-              message="No expenses launched this month. Check back soon for new expenses."
+              message="No financial transactions launched this month. Check back soon for new transactions."
               icon={CalendarIcon}
             />
           )}
@@ -72,7 +72,7 @@ export default async function MonthExpenses() {
           </div>
         ) : (
           <EmptyState
-            message="No expenses launched this month. Check back soon for new expenses."
+            message="No financial transactions launched this month. Check back soon for new transactions."
             icon={CalendarIcon}
           />
         )}
