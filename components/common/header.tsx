@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: HomeIcon },
-  { href: "/expenses", label: "Expenses", icon: DollarSign },
+  { href: "/expenses", label: "Finances", icon: DollarSign },
   { href: "/dashboard", label: "Dashboard", icon: AlignEndHorizontal },
   { href: "/categories", label: "Categories", icon: Tags },
 ] as const;
